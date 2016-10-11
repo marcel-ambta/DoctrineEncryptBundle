@@ -12,7 +12,7 @@ use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Util\ClassUtils;
 use \ReflectionClass;
 use Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface;
-
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 /**
  * Doctrine event subscriber which encrypt/decrypt entities
  */
@@ -259,6 +259,9 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
                         $propName = $refProperty->getName();
                         $entity->$propName = $this->encryptor->$encryptorMethod($refProperty->getValue());
                     } else {
+                        $nameConverter = new CamelCaseToSnakeCaseNameConverter();
+                        $methodName = $nameConverter->denormalize($methodName);
+                        
                         //If private or protected check if there is an getter/setter for the property, based on the $methodName
                         if ($reflectionClass->hasMethod($getter = 'get' . $methodName) && $reflectionClass->hasMethod($setter = 'set' . $methodName)) {
 

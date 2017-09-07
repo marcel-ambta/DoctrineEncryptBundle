@@ -58,17 +58,17 @@ You can use the comment `doctrine:decrypt:database [encryptor]` to decrypt the c
     * Default: Your encryptor set in the configuration file or the default encryption class when not set in the configuration file
 
 ```
-$ php app/console doctrine:encrypt:database
+$ php app/console doctrine:decrypt:database
 ```
 
 or you can provide an encryptor (optional).
 
 ```
-$ php app/console doctrine:encrypt:database rijndael256
+$ php app/console doctrine:decrypt:database rijndael256
 ```
 
 ```
-$ php app/console doctrine:encrypt:database \Ambta\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor
+$ php app/console doctrine:decrypt:database \Ambta\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor
 ```
 
 This command will return the amount of entities and the amount of values decrypted in the database.

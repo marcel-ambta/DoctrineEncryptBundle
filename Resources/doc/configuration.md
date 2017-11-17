@@ -14,6 +14,9 @@ There are 3 paramaters in the configuration of the Doctrine encryption bundle wh
     * Encryptor class, [your own encryptor class](https://github.com/ambta/DoctrineEncryptBundle/blob/master/Resources/doc/custom_encryptor.md) will override encryptor paramater
     * Default: empty
     
+* **encrypted_suffix** - Custom suffix for encrypting data
+    * Default: <ENC>
+   
 ## yaml
 
 ``` yaml

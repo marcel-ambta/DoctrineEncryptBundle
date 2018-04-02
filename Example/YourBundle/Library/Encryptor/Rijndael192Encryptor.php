@@ -1,7 +1,7 @@
 <?php
 namespace YourBundle\Library\Encryptor;
 
-use Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface;
+use PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
 
 /**
  * Class for variable encryption

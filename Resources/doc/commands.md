@@ -39,7 +39,7 @@ $ php app/console doctrine:encrypt:database rijndael256
 ```
 
 ```
-$ php app/console doctrine:encrypt:database \Ambta\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor
+$ php app/console doctrine:encrypt:database \PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor
 ```
 
 This command will return the amount of values encrypted in the database.
@@ -68,7 +68,7 @@ $ php app/console doctrine:encrypt:database rijndael256
 ```
 
 ```
-$ php app/console doctrine:encrypt:database \Ambta\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor
+$ php app/console doctrine:encrypt:database \PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor
 ```
 
 This command will return the amount of entities and the amount of values decrypted in the database.

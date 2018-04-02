@@ -1,6 +1,6 @@
 <?php
 
-namespace Ambta\DoctrineEncryptBundle\Subscribers;
+namespace PhilETaylor\DoctrineEncrypt\Subscribers;
 
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
@@ -11,7 +11,7 @@ use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\Util\ClassUtils;
 use \ReflectionClass;
-use Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface;
+use PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 /**
  * Doctrine event subscriber which encrypt/decrypt entities
@@ -21,12 +21,12 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
     /**
      * Encryptor interface namespace
      */
-    const ENCRYPTOR_INTERFACE_NS = 'Ambta\DoctrineEncryptBundle\Encryptors\EncryptorInterface';
+    const ENCRYPTOR_INTERFACE_NS = 'PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface';
 
     /**
      * Encrypted annotation full name
      */
-    const ENCRYPTED_ANN_NAME = 'Ambta\DoctrineEncryptBundle\Configuration\Encrypted';
+    const ENCRYPTED_ANN_NAME = 'PhilETaylor\DoctrineEncrypt\Configuration\Encrypted';
 
     /**
      * Encryptor

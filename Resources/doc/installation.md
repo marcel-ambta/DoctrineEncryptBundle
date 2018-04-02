@@ -40,7 +40,7 @@ public function registerBundles()
 {
     $bundles = array(
         // ...
-        new Ambta\DoctrineEncryptBundle\AmbtaDoctrineEncryptBundle(),
+        new PhilETaylor\DoctrineEncrypt\AmbtaDoctrineEncryptBundle(),
     );
 }
 ```

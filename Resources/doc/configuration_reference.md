@@ -9,6 +9,6 @@ ambta_doctrine_encrypt:
 # Store a backup of this key on a secure location, losing this key will mean losing your data!
     secret_key:           ~ # Required
 #  If you want, you can use your own Encryptor. Encryptor must implements EncryptorInterface interface
-#  Default: Ambta\DoctrineEncryptBundle\Encryptors\VariableEncryptor
+#  Default: PhilETaylor\DoctrineEncrypt\Encryptors\VariableEncryptor
     encryptor_class:      ~ #optional
 ```

@@ -10,7 +10,7 @@
         "doctrine/orm": ">=2.5"
     },
     "autoload": {
-        "psr-0": { "Ambta\\DoctrineEncryptBundle": "" }
+        "psr-0": { "PhilETaylor\\DoctrineEncrypt": "" }
     },
     "authors": [
         {

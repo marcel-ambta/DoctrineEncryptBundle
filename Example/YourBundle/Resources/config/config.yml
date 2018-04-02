@@ -1,4 +1,4 @@
 ambta_doctrine_encrypt:
     secret_key:           AB1CD2EF3GH4IJ5KL6MN7OP8QR9ST0UW # Your own random 256 bit key (32 characters)
     #encryptor:            rijndael256 # rijndael256 or rijndael128
-    encryptor_class:      \Ambta\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor # your own encryption class
+    encryptor_class:      \PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor # your own encryption class

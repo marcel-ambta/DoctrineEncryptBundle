@@ -15,6 +15,10 @@
     "target-dir": "Ambta/DoctrineEncryptBundle",
     "authors": [
         {
+            "name": "Phil Taylor",
+            "email": "phil@phil-taylor.com"
+        },
+        {
             "name": "Marcel van Nuil",
             "email": "marcel@ambta.com"
         }

@@ -1,4 +1,15 @@
+# WIP April 2017 - DO NOT USE
+
+Forked from ambta/DoctrineEncryptBundle for major rewrite with aims
+
+ - Symfony 3.4+ Compatibility 
+ - PHP 7.2+
+ - Using Sodium* methods for encryption
+ - Implement Blind indexs for encrypted data with authenticated hashes (see: 
+
 #DoctrineEncryptBundle
+
+
 
 Bundle allows to create doctrine entities with fields that will be protected with 
 help of some encryption algorithm in database and it will be clearly for developer, because bundle is uses doctrine life cycle events

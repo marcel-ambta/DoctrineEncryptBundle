@@ -14,7 +14,7 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
  */
-class DoctrineEncryptExtension extends Extension {
+class PhilETaylorDoctrineEncryptExtension extends Extension {
 
     public static $supportedEncryptorClasses = array('rijndael256' => 'PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor',
                                                     'rijndael128'=> 'PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael128Encryptor');
@@ -23,7 +23,7 @@ class DoctrineEncryptExtension extends Extension {
      * {@inheritDoc}
      */
     public function load(array $configs, ContainerBuilder $container) {
-
+die('a');
         //Create configuration object
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
@@ -53,12 +53,14 @@ class DoctrineEncryptExtension extends Extension {
         }
 
         //Set parameters
-        $container->setParameter('doctrine_encrypt.encryptor_class_name', $config['encryptor_class']);
-        $container->setParameter('doctrine_encrypt.secret_key', $config['secret_key']);
+        $container->setParameter('phil_e_taylor_doctrine_encrypt.encryptor_class_name', $config['encryptor_class']);
+        $container->setParameter('phil_e_taylor_doctrine_encrypt.secret_key', $config['secret_key']);
 
         //Load service file
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load(sprintf('%s.yml', $services['orm']));
+
+        die('here');
 
     }
 

@@ -21,7 +21,7 @@ class Configuration implements ConfigurationInterface {
 
         //Create tree builder
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('doctrine_encrypt');
+        $rootNode = $treeBuilder->root('phil_e_taylor_doctrine_encrypt');
 
         // Grammar of config tree
         $rootNode

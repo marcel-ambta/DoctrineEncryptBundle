@@ -10,7 +10,9 @@
         "doctrine/orm": ">=2.5"
     },
     "autoload": {
-        "psr-0": { "PhilETaylor\\DoctrineEncrypt": "" }
+        "psr-0": {
+            "PhilETaylor\\DoctrineEncrypt\\": ""
+        },
         "psr-4": {
             "PhilETaylor\\DoctrineEncrypt\\": ""
         },

@@ -7,7 +7,7 @@
     "require": {
         "php": ">=7.2",
         "symfony/framework-bundle": ">=3.4",
-        "doctrine/orm": ">=2.5",
+        "doctrine/orm": ">=2.5"
     },
     "autoload": {
         "psr-0": { "Ambta\\DoctrineEncryptBundle": "" }

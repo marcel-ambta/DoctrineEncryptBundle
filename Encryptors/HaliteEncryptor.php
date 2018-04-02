@@ -92,7 +92,9 @@ class HaliteEncryptor implements EncryptorInterface
      */
     public function setKeyName($key_name)
     {
-        $this->enc_key_name = $key_name;
-        $this->enc_key = KeyFactory::loadEncryptionKey($this->enc_keys[$key_name]);
+        if (array_key_exists($key_name, $this->enc_keys)) {
+            $this->enc_key_name = $key_name;
+            $this->enc_key = KeyFactory::loadEncryptionKey($this->enc_keys[$key_name]);
+        }
     }
 }

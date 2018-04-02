@@ -23,7 +23,7 @@ class PhilETaylorDoctrineEncryptExtension extends Extension {
      * {@inheritDoc}
      */
     public function load(array $configs, ContainerBuilder $container) {
-die('a');
+
         //Create configuration object
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
@@ -59,9 +59,6 @@ die('a');
         //Load service file
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load(sprintf('%s.yml', $services['orm']));
-
-        die('here');
-
     }
 
     /**

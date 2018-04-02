@@ -2,6 +2,7 @@
 
 namespace PhilETaylor\DoctrineEncrypt;
 
+use PhilETaylor\DoctrineEncrypt\DependencyInjection\PhilETaylorDoctrineEncryptExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
@@ -17,6 +18,7 @@ class PhilETaylorDoctrineEncrypt extends Bundle {
     
     public function getContainerExtension()
     {
-        return new DoctrineEncryptExtension();
+        return new PhilETaylorDoctrineEncryptExtension();
+//        return new DoctrineEncryptExtension();
     }
 }

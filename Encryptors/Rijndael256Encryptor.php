@@ -24,10 +24,10 @@ class Rijndael256Encryptor implements EncryptorInterface {
      */
     public function __construct($key) {
         $this->secretKey = md5($key);
-        $this->initializationVector = mcrypt_create_iv(
-            mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB),
-            MCRYPT_RAND
-        );
+//        $this->initializationVector = mcrypt_create_iv(
+//            mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB),
+//            MCRYPT_RAND
+//        );
     }
 
     /**
@@ -36,6 +36,7 @@ class Rijndael256Encryptor implements EncryptorInterface {
     public function encrypt($data) {
 
         if(is_string($data)) {
+            return $data;
             return trim(base64_encode(mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_256,
                 $this->secretKey,
@@ -57,6 +58,8 @@ class Rijndael256Encryptor implements EncryptorInterface {
         if(is_string($data)) {
 
             $data = str_replace("<ENC>", "", $data);
+
+            return $data;
 
             return trim(mcrypt_decrypt(
                 MCRYPT_RIJNDAEL_256,

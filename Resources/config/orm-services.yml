@@ -1,15 +1,15 @@
 services:
-    doctrine_encrypt.orm_subscriber:
+    phil_e_taylor_doctrine_encrypt.orm_subscriber:
         class: PhilETaylor\DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber
-        arguments: ["@annotation_reader", "%doctrine_encrypt.encryptor_class_name%", "%doctrine_encrypt.secret_key%"]
+        arguments: ["@annotation_reader", "%phil_e_taylor_doctrine_encrypt.encryptor_class_name%", "%phil_e_taylor_doctrine_encrypt.secret_key%"]
         tags:
             -  { name: doctrine.event_subscriber }
 
-    doctrine_encrypt.subscriber:
-        alias: doctrine_encrypt.orm_subscriber
+    phil_e_taylor_doctrine_encrypt.subscriber:
+        alias: phil_e_taylor_doctrine_encrypt.orm_subscriber
 
-    doctrine_encrypt.encryptor:
+    phil_e_taylor_doctrine_encrypt.encryptor:
         class: PhilETaylor\DoctrineEncrypt\Services\Encryptor
         arguments:
-            - "%doctrine_encrypt.encryptor_class_name%"
-            - "%doctrine_encrypt.secret_key%"
+            - "%phil_e_taylor_doctrine_encrypt.encryptor_class_name%"
+            - "%phil_e_taylor_doctrine_encrypt.secret_key%"

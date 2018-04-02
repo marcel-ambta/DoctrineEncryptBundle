@@ -12,7 +12,7 @@
     "autoload": {
         "psr-0": { "Ambta\\DoctrineEncryptBundle": "" }
     },
-    "target-dir": "Ambta/DoctrineEncryptBundle",
+    "target-dir": "philetaylor/doctrine-encrypt",
     "authors": [
         {
             "name": "Phil Taylor",

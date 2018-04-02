@@ -10,4 +10,6 @@ namespace PhilETaylor\DoctrineEncrypt\Configuration;
  */
 class Encrypted {
     //Just an placeholder
+
+    public $key_name;
 }

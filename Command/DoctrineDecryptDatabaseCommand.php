@@ -28,7 +28,6 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         $this
             ->setName('doctrine:decrypt:database')
             ->setDescription('Decrypt whole database on tables which are encrypted')
-            ->addArgument("encryptor", InputArgument::OPTIONAL, 'The encryptor you want to decrypt the database with')
             ->addArgument('batchSize', InputArgument::OPTIONAL, 'The update/flush batch size', 20);
     }
 
@@ -37,29 +36,13 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        ini_set('memory_limit', '1024M');
+
         //Get entity manager, question helper, subscriber service and annotation reader
         $question = $this->getHelper('question');
 
         //Get list of supported encryptors
-        $supportedExtensions = DoctrineEncryptExtension::$supportedEncryptorClasses;
         $batchSize = $input->getArgument('batchSize');
-
-        //If encryptor has been set use that encryptor else use default
-        if($input->getArgument('encryptor')) {
-            if(isset($supportedExtensions[$input->getArgument('encryptor')])) {
-                $this->subscriber->setEncryptor($supportedExtensions[$input->getArgument('encryptor')]);
-            } else {
-                if(class_exists($input->getArgument('encryptor')))
-                {
-                    $this->subscriber->setEncryptor($input->getArgument('encryptor'));
-                } else {
-                    $output->writeln('\nGiven encryptor does not exists');
-                    $output->writeln('Supported encryptors: ' . implode(', ', array_keys($supportedExtensions)));
-                    $output->writeln('You can also define your own class. (example: PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael128Encryptor)');
-                    return;
-                }
-            }
-        }
 
         //Get entity manager metadata
         $metaDataArray = $this->entityManager->getMetadataFactory()->getAllMetadata();

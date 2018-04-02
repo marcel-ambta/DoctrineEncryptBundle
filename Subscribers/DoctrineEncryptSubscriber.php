@@ -13,6 +13,7 @@ use Doctrine\Common\Util\ClassUtils;
 use \ReflectionClass;
 use PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
+
 /**
  * Doctrine event subscriber which encrypt/decrypt entities
  */
@@ -44,7 +45,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
      * Secret key
      * @var string
      */
-    private $secretKey;
+    private $secretKeys;
 
     /**
      * Used for restoring the encryptor after changing it
@@ -74,14 +75,15 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
      *
      * This allows for the use of dependency injection for the encrypters.
      */
-    public function __construct(Reader $annReader, $encryptorClass, $secretKey, EncryptorInterface $service = NULL) {
+    public function __construct(Reader $annReader, $encryptorClass, $secretKeys, EncryptorInterface $service = NULL) {
+
         $this->annReader = $annReader;
-        $this->secretKey = $secretKey;
+        $this->secretKeys = $secretKeys;
 
         if ($service instanceof EncryptorInterface) {
             $this->encryptor = $service;
         } else {
-            $this->encryptor = $this->encryptorFactory($encryptorClass, $secretKey);
+            $this->encryptor = $this->encryptorFactory($encryptorClass, $secretKeys);
         }
 
         $this->restoreEncryptor = $this->encryptor;
@@ -249,8 +251,11 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
                 /**
                  * If property is an normal value and contains the Encrypt tag, lets encrypt/decrypt that property
                  */
-                if ($this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME)) {
+                if ($AnnotationConfig = $this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME)) {
 
+                    if(property_exists($AnnotationConfig,'key_name')) {
+                        $this->encryptor->setKeyName($AnnotationConfig->key_name);
+                    }
 
                     /**
                      * If it is public lets not use the getter/setter
@@ -273,20 +278,20 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
                             }
 
                             /**
-                             * Then decrypt, encrypt the information if not empty, information is an string and the <ENC> tag is there (decrypt) or not (encrypt).
-                             * The <ENC> will be added at the end of an encrypted string so it is marked as encrypted. Also protects against double encryption/decryption
+                             * Then decrypt, encrypt the information if not empty, information is an string and the <Ha> tag is there (decrypt) or not (encrypt).
+                             * The <Ha> will be added at the end of an encrypted string so it is marked as encrypted. Also protects against double encryption/decryption
                              */
                             if($encryptorMethod == "decrypt") {
                                 if(!is_null($getInformation) and !empty($getInformation)) {
-                                    if(substr($getInformation, -5) == "<ENC>") {
+                                    if(substr($getInformation, -4) == "<Ha>") {
                                         $this->decryptCounter++;
-                                        $currentPropValue = $this->encryptor->decrypt(substr($getInformation, 0, -5));
+                                        $currentPropValue = $this->encryptor->decrypt(substr($getInformation, 0, -4));
                                         $entity->$setter($currentPropValue);
                                     }
                                 }
                             } else {
                                 if(!is_null($getInformation) and !empty($getInformation)) {
-                                    if(substr($entity->$getter(), -5) != "<ENC>") {
+                                    if(substr($entity->$getter(), -4) != "<Ha>") {
                                         $this->encryptCounter++;
                                         $currentPropValue = $this->encryptor->encrypt($entity->$getter());
                                         $entity->$setter($currentPropValue);

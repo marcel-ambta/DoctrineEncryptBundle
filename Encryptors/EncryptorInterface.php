@@ -26,4 +26,10 @@ interface EncryptorInterface {
      * @return string Plain text
      */
     public function decrypt($data);
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function setKeyName($key);
 }

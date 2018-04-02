@@ -43,9 +43,9 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
 
     /**
      * Secret key
-     * @var string
+     * @var array
      */
-    private $secretKeys;
+    private $secretKeys = [];
 
     /**
      * Used for restoring the encryptor after changing it
@@ -75,7 +75,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
      *
      * This allows for the use of dependency injection for the encrypters.
      */
-    public function __construct(Reader $annReader, $encryptorClass, $secretKeys, EncryptorInterface $service = NULL) {
+    public function __construct(Reader $annReader, $encryptorClass, array $secretKeys, EncryptorInterface $service = NULL) {
 
         $this->annReader = $annReader;
         $this->secretKeys = $secretKeys;
@@ -90,6 +90,16 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
     }
 
     /**
+     * @return string
+     */
+    public function getSecretKeys(): array
+    {
+        return $this->secretKeys;
+    }
+
+
+
+    /**
      * Change the encryptor
      *
      * @param $encryptorClass
@@ -97,7 +107,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
     public function setEncryptor($encryptorClass) {
 
         if(!is_null($encryptorClass)) {
-            $this->encryptor = $this->encryptorFactory($encryptorClass, $this->secretKey);
+            $this->encryptor = $this->encryptorFactory($encryptorClass, $this->secretKeys);
             return;
         }
 
@@ -370,10 +380,10 @@ class DoctrineEncryptSubscriber implements EventSubscriber {
      * @return EncryptorInterface
      * @throws \RuntimeException
      */
-    private function encryptorFactory($classFullName, $secretKey) {
+    private function encryptorFactory($classFullName, $secretKeys) {
         $refClass = new \ReflectionClass($classFullName);
         if ($refClass->implementsInterface(self::ENCRYPTOR_INTERFACE_NS)) {
-            return new $classFullName($secretKey);
+            return new $classFullName($secretKeys);
         } else {
             throw new \RuntimeException('Encryptor must implements interface EncryptorInterface');
         }

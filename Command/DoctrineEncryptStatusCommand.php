@@ -53,5 +53,12 @@ class DoctrineEncryptStatusCommand extends AbstractCommand
 
         $output->writeln('');
         $output->writeln(sprintf('<info>%d</info> entities found which are containing <info>%d</info> encrypted properties.', count($metaDataArray), $totalCount));
+
+        $output->writeln('');
+        $output->writeln('Here are the configured encryption keys:');
+        $keys = $this->subscriber->getSecretKeys();
+        foreach ($keys as $k=>$v){
+            $output->writeln("<info>$k</info>\t\t=>\t\t<info>$v</info>");
+        }
     }
 }

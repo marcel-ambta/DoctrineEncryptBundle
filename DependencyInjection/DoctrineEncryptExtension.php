@@ -39,7 +39,7 @@ class DoctrineEncryptExtension extends Extension {
             if ($container->hasParameter('secret')) {
                 $config['secret_key'] = $container->getParameter('secret');
             } else {
-                throw new \RuntimeException('You must provide "secret_key" for DoctrineEncryptBundle or "secret" for framework');
+                throw new \RuntimeException('You must provide "secret_key" for doctrine_encrypt or "secret" for framework');
             }
         }
 
@@ -53,8 +53,8 @@ class DoctrineEncryptExtension extends Extension {
         }
 
         //Set parameters
-        $container->setParameter('ambta_doctrine_encrypt.encryptor_class_name', $config['encryptor_class']);
-        $container->setParameter('ambta_doctrine_encrypt.secret_key', $config['secret_key']);
+        $container->setParameter('doctrine_encrypt.encryptor_class_name', $config['encryptor_class']);
+        $container->setParameter('doctrine_encrypt.secret_key', $config['secret_key']);
 
         //Load service file
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
@@ -68,6 +68,6 @@ class DoctrineEncryptExtension extends Extension {
      * @return string
      */
     public function getAlias() {
-        return 'ambta_doctrine_encrypt';
+        return 'doctrine_encrypt';
     }
 }

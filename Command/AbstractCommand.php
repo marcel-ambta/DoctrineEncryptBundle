@@ -39,7 +39,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
         $container = $this->getContainer();
         $this->entityManager = $container->get('doctrine.orm.entity_manager');
         $this->annotationReader = $container->get('annotation_reader');
-        $this->subscriber = $container->get('ambta_doctrine_encrypt.subscriber');
+        $this->subscriber = $container->get('doctrine_encrypt.subscriber');
     }
 
     /**

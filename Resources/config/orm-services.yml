@@ -1,13 +1,15 @@
 services:
-    ambta_doctrine_encrypt.orm_subscriber:
+    doctrine_encrypt.orm_subscriber:
         class: PhilETaylor\DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber
-        arguments: ["@annotation_reader", "%ambta_doctrine_encrypt.encryptor_class_name%", "%ambta_doctrine_encrypt.secret_key%"]
+        arguments: ["@annotation_reader", "%doctrine_encrypt.encryptor_class_name%", "%doctrine_encrypt.secret_key%"]
         tags:
             -  { name: doctrine.event_subscriber }
-    ambta_doctrine_encrypt.subscriber:
-        alias: ambta_doctrine_encrypt.orm_subscriber
-    ambta_doctrine_encrypt.encryptor:
+
+    doctrine_encrypt.subscriber:
+        alias: doctrine_encrypt.orm_subscriber
+
+    doctrine_encrypt.encryptor:
         class: PhilETaylor\DoctrineEncrypt\Services\Encryptor
         arguments:
-            - "%ambta_doctrine_encrypt.encryptor_class_name%"
-            - "%ambta_doctrine_encrypt.secret_key%"
+            - "%doctrine_encrypt.encryptor_class_name%"
+            - "%doctrine_encrypt.secret_key%"

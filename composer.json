@@ -11,6 +11,12 @@
     },
     "autoload": {
         "psr-0": { "PhilETaylor\\DoctrineEncrypt": "" }
+        "psr-4": {
+            "PhilETaylor\\DoctrineEncrypt\\": ""
+        },
+        "exclude-from-classmap": [
+            "/Tests/"
+        ]
     },
     "authors": [
         {

@@ -7,6 +7,10 @@ Forked from ambta/DoctrineEncryptBundle for major rewrite with aims
  - Using Sodium* methods for encryption
  - Implement Blind indexs for encrypted data with authenticated hashes (see: 
 
+
+====================================================================================
+Previous out of date readme:
+
 #DoctrineEncryptBundle
 
 

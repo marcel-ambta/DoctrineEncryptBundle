@@ -1,14 +1,13 @@
 {
-    "name": "ambta/doctrine-encrypt-bundle",
+    "name": "philetaylor/doctrine-encrypt",
     "type": "library",
-    "keywords": ["doctrine", "symfony", "aes256", "rijndael", "encrypt", "decrypt"],
+    "keywords": ["doctrine", "symfony", "encrypt", "decrypt"],
     "license": "MIT",
-    "description": "Symfony 2 bundle which allows to encrypt data in database with some encrypt algorithm",
+    "description": "Symfony 3.4+/PHP7.2+ bundle which allows to encrypt data in database",
     "require": {
-        "php": ">=5.4",
-        "symfony/framework-bundle": ">=2.5",
+        "php": ">=7.2",
+        "symfony/framework-bundle": ">=3.4",
         "doctrine/orm": ">=2.5",
-        "ext-mcrypt": "*"
     },
     "autoload": {
         "psr-0": { "Ambta\\DoctrineEncryptBundle": "" }

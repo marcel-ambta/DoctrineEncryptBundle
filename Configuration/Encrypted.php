@@ -9,7 +9,9 @@ namespace PhilETaylor\DoctrineEncrypt\Configuration;
  * @Annotation
  */
 class Encrypted {
-    //Just an placeholder
 
+    /**
+     * @var string the key nameindex to use for encryption/decryption
+     */
     public $key_name;
 }

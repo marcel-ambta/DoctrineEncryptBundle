@@ -6,11 +6,12 @@ use MyJoomla\AuditTools\Audit\FilesInformation\RenamedToHide;
 use ParagonIE\Halite\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
+use ParagonIE\Halite\Alerts\CannotPerformOperation;
+use ParagonIE\Halite\Alerts\InvalidKey;
 
 /**
- * Class for AES256 encryption
- *
- * @author Victor Melnik <melnikvictorl@gmail.com>
+ * Class HaliteEncryptor
+ * @package PhilETaylor\DoctrineEncrypt\Encryptors
  */
 class HaliteEncryptor implements EncryptorInterface
 {
@@ -82,10 +83,12 @@ class HaliteEncryptor implements EncryptorInterface
     /**
      * Choice a key from the available keys
      *
-     * @param $key_name
-     * @return mixed|void
-     * @throws \ParagonIE\Halite\Alerts\CannotPerformOperation
-     * @throws \ParagonIE\Halite\Alerts\InvalidKey
+     * @param $key_name the key name to use
+     *
+     * @return void
+     *
+     * @throws CannotPerformOperation
+     * @throws InvalidKey
      */
     public function setKeyName($key_name)
     {

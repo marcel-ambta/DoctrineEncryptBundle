@@ -49,6 +49,11 @@ class HaliteEncryptor implements EncryptorInterface
      */
     public function encrypt($data)
     {
+        // already encrypted!
+        if (false !== strpos($data, "<Ha>")){
+            return $data;
+        }
+
         if (is_string($data)) {
             $ciphertext = Crypto::encrypt(
                 new HiddenString(

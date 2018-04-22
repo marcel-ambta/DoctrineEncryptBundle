@@ -449,6 +449,17 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
+     * Listen a prePersist lifecycle event. Checking and encrypt entities
+     * which have @Encrypted annotation
+     * @param LifecycleEventArgs $args
+     */
+    public function prePersist(LifecycleEventArgs $args)
+    {
+        $entity = $args->getEntity();
+        $this->processFields($entity);
+    }
+
+    /**
      * Realization of EventSubscriber interface method.
      *
      * @return Array Return all events which this subscriber is listening
@@ -459,9 +470,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             Events::prePersist,
             Events::postPersist,
             Events::preUpdate,
-            Events::preUpdate,
             Events::postUpdate,
-            Events::postLoad,
             Events::postLoad,
         );
     }

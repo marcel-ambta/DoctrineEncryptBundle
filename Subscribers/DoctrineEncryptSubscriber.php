@@ -257,7 +257,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             switch ($isEncryptOperation){
                 case true:
 
-                    $oldValue = $this->_originalValues[$oid][$refProperty->getName()];
+                    $oldValue = @$this->_originalValues[$oid][$refProperty->getName()];
                     if (substr($oldValue, strlen($oldValue) -4)=='<Ha>') {
                         $oldValue = $this->encryptor->decrypt(substr($oldValue, 0, strlen($oldValue)-4));
                     }

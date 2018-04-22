@@ -26,7 +26,8 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         $this
             ->setName('doctrine:encrypt:database')
             ->setDescription('Encrypt whole database on tables which are not encrypted yet')
-            ->addArgument('batchSize', InputArgument::OPTIONAL, 'The update/flush batch size', 20);
+            ->addArgument('batchSize', InputArgument::OPTIONAL, 'The update/flush batch size', 20)
+            ->addArgument('entity', InputArgument::OPTIONAL, 'The entity to run');
 
     }
 
@@ -40,6 +41,7 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         //Get entity manager, question helper, subscriber service and annotation reader
         $question = $this->getHelper('question');
         $batchSize = $input->getArgument('batchSize');
+        $entity = $input->getArgument('entity');
 
         //Get entity manager metadata
         $metaDataArray = $this->getEncryptionableEntityMetaData();
@@ -60,6 +62,14 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
 
         //Loop through entity manager meta data
         foreach($metaDataArray as $metaData) {
+            $output->writeln('<info>Found '.$metaData->name.'</info>');
+        }
+        foreach($metaDataArray as $metaData) {
+
+            if ($entity !==null && $entity!=$metaData->name){
+                continue;
+            }
+
             $i = 0;
             $iterator = $this->getEntityIterator($metaData->name);
             $totalCount = $this->getTableCount($metaData->name);
@@ -67,6 +77,7 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
             $output->writeln(sprintf('Processing <comment>%s</comment>', $metaData->name));
             $progressBar = new ProgressBar($output, $totalCount);
             foreach ($iterator as $row) {
+
                 $this->subscriber->processFields($row[0]);
 
                 if (($i % $batchSize) === 0) {

@@ -4,16 +4,12 @@ namespace PhilETaylor\DoctrineEncrypt\Subscribers;
 
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Util\ClassUtils;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
-use Doctrine\ORM\Event\PreFlushEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 use Doctrine\ORM\Events;
 use PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
-use ReflectionClass;
-use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
 /**
  * Doctrine event subscriber which encrypt/decrypt entities
@@ -40,6 +36,8 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * @var integer
      */
     public $encryptCounter = 0;
+
+    public $_originalValues = [];
     /**
      * Encryptor
      * @var EncryptorInterface
@@ -61,6 +59,21 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * @var string
      */
     private $restoreEncryptor;
+    /**
+     * /**
+     * Caches information on an entity's encrypted fields in an array keyed on
+     * the entity's class name. The value will be a list of Reflected fields that are encrypted.
+     *
+     * @var array
+     */
+    private $encryptedFieldCache = array();
+    /**
+     * Before flushing the objects out to the database, we modify their password value to the
+     * encrypted value. Since we want the password to remain decrypted on the entity after a flush,
+     * we have to write the decrypted value back to the entity.
+     * @var array
+     */
+    private $postFlushDecryptQueue = array();
 
     /**
      * Initialization of subscriber
@@ -104,6 +117,14 @@ class DoctrineEncryptSubscriber implements EventSubscriber
         } else {
             throw new \RuntimeException('Encryptor must implements interface EncryptorInterface');
         }
+    }
+
+    public static function capitalize(string $word): string
+    {
+        if (is_array($word)) {
+            $word = $word[0];
+        }
+        return str_replace(' ', '', ucwords(str_replace(array('-', '_'), ' ', $word)));
     }
 
     /**
@@ -151,335 +172,193 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
-     * Listen a postUpdate lifecycle event.
-     * Decrypt entities property's values when post updated.
+     * Encrypt the password before it is written to the database.
      *
-     * So for example after form submit the preUpdate encrypted the entity
-     * We have to decrypt them before showing them again.
-     *
-     * @param LifecycleEventArgs $args
+     * Notice that we do not recalculate changes otherwise the password will be written
+     * every time (Because it is going to differ from the un-encrypted value)
      */
-    public function postUpdate(LifecycleEventArgs $args)
+    public function onFlush(OnFlushEventArgs $args)
     {
-
-        $this->checkAndReloadEntities($args);
-//        $entity = $args->getEntity();
-//        $this->processFields($entity, false);
-
+        $em = $args->getEntityManager();
+        $unitOfWork = $em->getUnitOfWork();
+        $this->postFlushDecryptQueue = array();
+        foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
+            $this->entityOnFlush($entity, $em);
+            $unitOfWork->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($entity)), $entity);
+        }
+        foreach ($unitOfWork->getScheduledEntityUpdates() as $entity) {
+            $this->entityOnFlush($entity, $em);
+            $unitOfWork->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($entity)), $entity);
+        }
     }
 
     /**
-     * Checking and decrypg entities which have @Encrypted annotations
+     * Processes the entity for an onFlush event.
      *
-     * @param LifecycleEventArgs $args
-     *
-     * @return void
+     * @param object $entity
      */
-    private function checkAndReloadEntities(LifecycleEventArgs $args)
+    private function entityOnFlush($entity, EntityManagerInterface $em)
+    {
+        $objId = spl_object_hash($entity);
+        $fields = array();
+        foreach ($this->getEncryptedFields($entity, $em) as $field) {
+            $fields[$field->getName()] = array(
+                'field' => $field,
+                'value' => $field->getValue($entity),
+            );
+        }
+        $this->postFlushDecryptQueue[$objId] = array(
+            'entity' => $entity,
+            'fields' => $fields,
+        );
+        $this->processFields($entity, $em);
+    }
+
+    /**
+     * @param bool $entity
+     * @return \ReflectionProperty[]
+     */
+    private function getEncryptedFields($entity, EntityManagerInterface $em)
+    {
+        $className = get_class($entity);
+        if (isset($this->encryptedFieldCache[$className])) {
+            return $this->encryptedFieldCache[$className];
+        }
+        $meta = $em->getClassMetadata($className);
+        $encryptedFields = array();
+        foreach ($meta->getReflectionProperties() as $refProperty) {
+            /** @var \ReflectionProperty $refProperty */
+            if ($this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME)) {
+
+                $refProperty->setAccessible(true);
+                $encryptedFields[] = $refProperty;
+            }
+        }
+        $this->encryptedFieldCache[$className] = $encryptedFields;
+        return $encryptedFields;
+    }
+
+    /**
+     * Process (encrypt/decrypt) entities fields
+     *
+     * @param object $entity Some doctrine entity
+     */
+    private function processFields($entity, EntityManagerInterface $em, $isEncryptOperation = true): bool
+    {
+        $properties = $this->getEncryptedFields($entity, $em);
+        $unitOfWork = $em->getUnitOfWork();
+        $oid = spl_object_hash($entity);
+        foreach ($properties as $refProperty) {
+            $AnnotationConfig = $this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME);
+            $this->encryptor->setKeyName($AnnotationConfig->key_name);
+
+            $value = $refProperty->getValue($entity);
+            $value = $value === null ? '' : $value;
+            switch ($isEncryptOperation){
+                case true:
+
+                    $oldValue = $this->_originalValues[$oid][$refProperty->getName()];
+                    if (substr($oldValue, strlen($oldValue) -4)=='<Ha>') {
+                        $oldValue = $this->encryptor->decrypt(substr($oldValue, 0, strlen($oldValue)-4));
+                    }
+
+                    if ($oldValue === $value || (null===$oldValue && null===$value)){
+                        $value = $oldValue;
+                    } else {
+                        $value = $this->encryptor->encrypt($value);
+                    }
+
+
+                    break;
+                case false:
+                    $this->_originalValues[$oid][$refProperty->getName()] = $value;
+
+                    if (substr($value, strlen($value) -4)=='<Ha>') {
+                        $value = $this->encryptor->decrypt(substr($value, 0, strlen($value)-4));
+                    }
+
+                    break;
+
+            }
+
+            if ($value!==null) {
+                $refProperty->setValue($entity, $value);
+            }
+
+            if (!$isEncryptOperation) {
+                //we don't want the object to be dirty immediately after reading
+                $unitOfWork->setOriginalEntityProperty($oid, $refProperty->getName(), $value);
+            }
+        }
+        return !empty($properties);
+    }
+
+    /**
+     * After we have persisted the entities, we want to have the
+     * decrypted information available once more.
+     */
+    public function postFlush(PostFlushEventArgs $args)
+    {
+        $unitOfWork = $args->getEntityManager()->getUnitOfWork();
+        foreach ($this->postFlushDecryptQueue as $pair) {
+            $fieldPairs = $pair['fields'];
+            $entity = $pair['entity'];
+            $oid = spl_object_hash($entity);
+            foreach ($fieldPairs as $fieldPair) {
+                /** @var \ReflectionProperty $field */
+                $field = $fieldPair['field'];
+                $field->setValue($entity, $fieldPair['value']);
+                $unitOfWork->setOriginalEntityProperty($oid, $field->getName(), $fieldPair['value']);
+            }
+            $this->addToDecodedRegistry($entity);
+        }
+        $this->postFlushDecryptQueue = array();
+    }
+
+    /**
+     * Adds entity to decoded registry
+     *
+     * @param object $entity Some doctrine entity
+     */
+    private function addToDecodedRegistry($entity)
+    {
+        $this->decodedRegistry[spl_object_hash($entity)] = true;
+    }
+
+    /**
+     * Listen a postLoad lifecycle event. Checking and decrypt entities
+     * which have @Encrypted annotations
+     */
+    public function postLoad(LifecycleEventArgs $args)
     {
         $entity = $args->getEntity();
-        if (!$this->hasInDecodedRegistry($entity, $args->getEntityManager())) {
-            if ($this->processFields($entity, false)) {
-                $this->addToDecodedRegistry($entity, $args->getEntityManager());
+        $em = $args->getEntityManager();
+        if (!$this->hasInDecodedRegistry($entity)) {
+            if ($this->processFields($entity, $em, false)) {
+                $this->addToDecodedRegistry($entity);
             }
         }
     }
 
     /**
      * Check if we have entity in decoded registry
-     * @param Object $entity Some doctrine entity
-     * @param \Doctrine\ORM\EntityManager $em
-     * @return boolean
-     */
-    private function hasInDecodedRegistry($entity, EntityManagerInterface $em)
-    {
-        $className = get_class($entity);
-        $metadata = $em->getClassMetadata($className);
-        $getter = 'get' . self::capitalize($metadata->getIdentifier());
-        return isset($this->decodedRegistry[$className][$entity->$getter()]);
-    }
-
-    /**
-     * Capitalize string
-     * @param string $word
-     * @return string
-     */
-    public static function capitalize($word)
-    {
-        if (is_array($word)) {
-            $word = $word[0];
-        }
-        return str_replace(' ', '', ucwords(str_replace(array('-', '_'), ' ', $word)));
-    }
-
-    /**
-     * Process (encrypt/decrypt) entities fields
      *
-     * @param Object $entity doctrine entity
-     * @param Boolean $isEncryptOperation If true - encrypt, false - decrypt entity
-     *
-     * @throws \RuntimeException
-     *
-     * @return object|null
-     */
-    public function processFields($entity, $isEncryptOperation = true)
-    {
-
-        if (!empty($this->encryptor)) {
-
-            //Check which operation to be used
-            $encryptorMethod = $isEncryptOperation ? 'encrypt' : 'decrypt';
-
-            //Get the real class, we don't want to use the proxy classes
-            if (strstr(get_class($entity), "Proxies")) {
-                $realClass = ClassUtils::getClass($entity);
-            } else {
-                $realClass = get_class($entity);
-            }
-
-            //Get ReflectionClass of our entity
-            $reflectionClass = new ReflectionClass($realClass);
-            $properties = $this->getClassProperties($realClass);
-
-            //Foreach property in the reflection class
-            foreach ($properties as $refProperty) {
-
-                if ($this->annReader->getPropertyAnnotation($refProperty, 'Doctrine\ORM\Mapping\Embedded')) {
-                    $this->handleEmbeddedAnnotation($entity, $refProperty, $isEncryptOperation);
-                    continue;
-                }
-                /**
-                 * If followed standards, method name is getPropertyName, the propertyName is lowerCamelCase
-                 * So just uppercase first character of the property, later on get and set{$methodName} wil be used
-                 */
-                $methodName = ucfirst($refProperty->getName());
-
-
-                /**
-                 * If property is an normal value and contains the Encrypt tag, lets encrypt/decrypt that property
-                 */
-                if ($AnnotationConfig = $this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME)) {
-
-                    if (property_exists($AnnotationConfig, 'key_name')) {
-                        $this->encryptor->setKeyName($AnnotationConfig->key_name);
-                    }
-
-                    /**
-                     * If it is public lets not use the getter/setter
-                     */
-                    if ($refProperty->isPublic()) {
-                        $propName = $refProperty->getName();
-                        $entity->$propName = $this->encryptor->$encryptorMethod($refProperty->getValue());
-                    } else {
-                        $nameConverter = new CamelCaseToSnakeCaseNameConverter();
-                        $methodName = $nameConverter->denormalize($methodName);
-
-                        //If private or protected check if there is an getter/setter for the property, based on the $methodName
-                        if ($reflectionClass->hasMethod($getter = 'get' . $methodName) && $reflectionClass->hasMethod($setter = 'set' . $methodName)) {
-
-                            //Get the information (value) of the property
-                            try {
-                                $getInformation = $entity->$getter();
-                            } catch (\Exception $e) {
-                                $getInformation = null;
-                            }
-
-                            /**
-                             * Then decrypt, encrypt the information if not empty, information is an string and the <Ha> tag is there (decrypt) or not (encrypt).
-                             * The <Ha> will be added at the end of an encrypted string so it is marked as encrypted. Also protects against double encryption/decryption
-                             */
-                            if ($encryptorMethod == "decrypt") {
-                                if (!is_null($getInformation) and !empty($getInformation)) {
-                                    if (substr($getInformation, -4) == "<Ha>") {
-                                        $this->decryptCounter++;
-                                        $currentPropValue = $this->encryptor->decrypt(substr($getInformation, 0, -4));
-                                        $entity->$setter($currentPropValue);
-                                    }
-                                }
-                            } else {
-                                if (!is_null($getInformation) and !empty($getInformation)) {
-                                    if (substr($entity->$getter(), -4) != "<Ha>") {
-                                        $this->encryptCounter++;
-                                        $currentPropValue = $this->encryptor->encrypt($entity->$getter());
-                                        $entity->$setter($currentPropValue);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return $entity;
-        }
-
-        return null;
-    }
-
-    /**
-     * Recursive function to get an associative array of class properties
-     * including inherited ones from extended classes
-     *
-     * @param string $className Class name
-     *
-     * @return array
-     */
-    function getClassProperties($className)
-    {
-
-        $reflectionClass = new ReflectionClass($className);
-        $properties = $reflectionClass->getProperties();
-        $propertiesArray = array();
-
-        foreach ($properties as $property) {
-            $propertyName = $property->getName();
-            $propertiesArray[$propertyName] = $property;
-        }
-
-        if ($parentClass = $reflectionClass->getParentClass()) {
-            $parentPropertiesArray = $this->getClassProperties($parentClass->getName());
-            if (count($parentPropertiesArray) > 0)
-                $propertiesArray = array_merge($parentPropertiesArray, $propertiesArray);
-        }
-
-        return $propertiesArray;
-    }
-
-    private function handleEmbeddedAnnotation($entity, $embeddedProperty, $isEncryptOperation = true)
-    {
-        $reflectionClass = new ReflectionClass($entity);
-        $propName = $embeddedProperty->getName();
-        $methodName = ucfirst($propName);
-
-        if ($embeddedProperty->isPublic()) {
-            $embeddedEntity = $embeddedProperty->getValue();
-        } else {
-            if ($reflectionClass->hasMethod($getter = 'get' . $methodName) && $reflectionClass->hasMethod($setter = 'set' . $methodName)) {
-
-                //Get the information (value) of the property
-                try {
-                    $embeddedEntity = $entity->$getter();
-                } catch (\Exception $e) {
-                    $embeddedEntity = null;
-                }
-            }
-        }
-        if ($embeddedEntity) {
-            $this->processFields($embeddedEntity, $isEncryptOperation);
-        }
-    }
-
-    /**
-     * Adds entity to decoded registry
      * @param object $entity Some doctrine entity
-     * @param \Doctrine\ORM\EntityManager $em
      */
-    private function addToDecodedRegistry($entity, EntityManagerInterface $em)
+    private function hasInDecodedRegistry($entity): bool
     {
-        $className = get_class($entity);
-
-        $metadata = $em->getClassMetadata($className);
-        $getter = 'get' . self::capitalize($metadata->getIdentifier());
-        $this->decodedRegistry[$className][$entity->$getter()] = true;
+        return isset($this->decodedRegistry[spl_object_hash($entity)]);
     }
 
     /**
-     * Listen a preUpdate lifecycle event. Checking and encrypt entities fields
-     * which have @Encrypted annotation. Using changesets to avoid preUpdate event
-     * restrictions
-     * @param PreUpdateEventArgs $args
+     * {@inheritdoc}
      */
-    public function preUpdate(PreUpdateEventArgs $args)
+    public function getSubscribedEvents(): array
     {
-        $reflectionClass = new ReflectionClass($args->getEntity());
-        $properties = $reflectionClass->getProperties();
-        foreach ($properties as $refProperty) {
-            if ($this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME)) {
-                $propName = $refProperty->getName();
-                if ($args->hasChangedField($propName)) {
-                    $args->setNewValue($propName, $this->encryptor->encrypt($args->getNewValue($propName)));
-                }
-            }
-        }
-    }
-
-    /**
-     * Listen a postLoad lifecycle event. Checking and decrypt entities
-     * which have @Encrypted annotations
-     * @param LifecycleEventArgs $args
-     */
-    public function postLoad(LifecycleEventArgs $args)
-    {
-        $entity = $args->getEntity();
-        if (!$this->hasInDecodedRegistry($entity, $args->getEntityManager())) {
-            if ($this->processFields($entity, false)) {
-                $this->addToDecodedRegistry($entity, $args->getEntityManager());
-            }
-        }
-    }
-
-    /**
-     * Listen to preflush event
-     * Encrypt entities that are inserted into the database
-     *
-     * @param PreFlushEventArgs $preFlushEventArgs
-     */
-    public function preFlush(PreFlushEventArgs $preFlushEventArgs)
-    {
-        $unitOfWork = $preFlushEventArgs->getEntityManager()->getUnitOfWork();
-        foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
-            $this->processFields($entity);
-        }
-    }
-
-    /**
-     * Listen to postFlush event
-     * Decrypt entities that after inserted into the database
-     *
-     * @param PostFlushEventArgs $postFlushEventArgs
-     */
-    public function postFlush(PostFlushEventArgs $postFlushEventArgs)
-    {
-        $unitOfWork = $postFlushEventArgs->getEntityManager()->getUnitOfWork();
-        foreach ($unitOfWork->getIdentityMap() as $entityMap) {
-            foreach ($entityMap as $entity) {
-                $this->processFields($entity, false);
-            }
-        }
-    }
-
-    /**
-     * Listen a prePersist lifecycle event. Checking and encrypt entities
-     * which have @Encrypted annotation
-     * @param LifecycleEventArgs $args
-     */
-    public function prePersist(LifecycleEventArgs $args)
-    {
-        $entity = $args->getEntity();
-        $this->processFields($entity);
-    }
-
-    /**
-     * Realization of EventSubscriber interface method.
-     *
-     * @return Array Return all events which this subscriber is listening
-     */
-    public function getSubscribedEvents()
-    {
-        return array(
-            Events::prePersist,
-            Events::postPersist,
-            Events::preUpdate,
-            Events::postUpdate,
+        return [
             Events::postLoad,
-        );
-    }
-
-    /**
-     * @param LifecycleEventArgs $args
-     */
-    public function postPersist(LifecycleEventArgs $args)
-    {
-        $this->checkAndReloadEntities($args);
+            Events::onFlush,
+            Events::postFlush,
+        ];
     }
 }

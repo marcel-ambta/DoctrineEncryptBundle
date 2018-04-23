@@ -54,19 +54,21 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * @var array
      */
     private $secretKeys = [];
+
     /**
      * Used for restoring the encryptor after changing it
      * @var string
      */
     private $restoreEncryptor;
+
     /**
-     * /**
      * Caches information on an entity's encrypted fields in an array keyed on
      * the entity's class name. The value will be a list of Reflected fields that are encrypted.
      *
      * @var array
      */
     private $encryptedFieldCache = array();
+
     /**
      * Before flushing the objects out to the database, we modify their password value to the
      * encrypted value. Since we want the password to remain decrypted on the entity after a flush,
@@ -133,34 +135,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     public function getSecretKeys(): array
     {
         return $this->secretKeys;
-    }
-
-    /**
-     * Get the current encryptor
-     */
-    public function getEncryptor()
-    {
-        if (!empty($this->encryptor)) {
-            return get_class($this->encryptor);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Change the encryptor
-     *
-     * @param $encryptorClass
-     */
-    public function setEncryptor($encryptorClass)
-    {
-
-        if (!is_null($encryptorClass)) {
-            $this->encryptor = $this->encryptorFactory($encryptorClass, $this->secretKeys);
-            return;
-        }
-
-        $this->encryptor = null;
     }
 
     /**
@@ -243,54 +217,92 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      *
      * @param object $entity Some doctrine entity
      */
-    private function processFields($entity, EntityManagerInterface $em, $isEncryptOperation = true): bool
+    public function processFields($entity, EntityManagerInterface $em, $isEncryptOperation = true, $force = null): bool
     {
         $properties = $this->getEncryptedFields($entity, $em);
         $unitOfWork = $em->getUnitOfWork();
         $oid = spl_object_hash($entity);
         foreach ($properties as $refProperty) {
             $AnnotationConfig = $this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME);
+
+            if (null === $this->getEncryptor()) {
+                continue;
+            }
+
             $this->encryptor->setKeyName($AnnotationConfig->key_name);
 
             $value = $refProperty->getValue($entity);
             $value = $value === null ? '' : $value;
-            switch ($isEncryptOperation){
+
+            switch ($isEncryptOperation) {
                 case true:
 
-                    $oldValue = @$this->_originalValues[$oid][$refProperty->getName()];
-                    if (substr($oldValue, strlen($oldValue) -4)=='<Ha>') {
-                        $oldValue = $this->encryptor->decrypt(substr($oldValue, 0, strlen($oldValue)-4));
-                    }
-
-                    if ($oldValue === $value || (null===$oldValue && null===$value)){
-                        $value = $oldValue;
-                    } else {
+                    if ($force === 'encrypt') {
                         $value = $this->encryptor->encrypt($value);
-                    }
+                    } else {
+                        $oldValue = @$this->_originalValues[$oid][$refProperty->getName()];
+                        if (substr($oldValue, strlen($oldValue) - 4) == '<Ha>') {
+                            $oldValue = $this->encryptor->decrypt(substr($oldValue, 0, strlen($oldValue) - 4));
+                        }
 
+                        if ($oldValue === $value || (null === $oldValue && null === $value)) {
+                            $value = $oldValue;
+                        } else {
+                            $value = $this->encryptor->encrypt($value);
+                        }
+                    }
 
                     break;
                 case false:
                     $this->_originalValues[$oid][$refProperty->getName()] = $value;
 
-                    if (substr($value, strlen($value) -4)=='<Ha>') {
-                        $value = $this->encryptor->decrypt(substr($value, 0, strlen($value)-4));
+                    if ($force === 'decrypt' && substr($value, strlen($value) - 4) == '<Ha>') {
+                        $value = $this->encryptor->decrypt(substr($value, 0, strlen($value) - 4));
+                    } elseif (substr($value, strlen($value) - 4) == '<Ha>') {
+                        $value = $this->encryptor->decrypt(substr($value, 0, strlen($value) - 4));
                     }
 
                     break;
 
             }
 
-            if ($value!==null) {
+            if ($value !== null) {
                 $refProperty->setValue($entity, $value);
             }
 
-            if (!$isEncryptOperation) {
+            if (!$isEncryptOperation && !defined('_DONOTENCRYPT')) {
                 //we don't want the object to be dirty immediately after reading
                 $unitOfWork->setOriginalEntityProperty($oid, $refProperty->getName(), $value);
             }
         }
         return !empty($properties);
+    }
+
+    /**
+     * Get the current encryptor
+     */
+    public function getEncryptor()
+    {
+        if (!empty($this->encryptor)) {
+            return get_class($this->encryptor);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Change the encryptor
+     *
+     * @param $encryptorClass
+     */
+    public function setEncryptor($encryptorClass)
+    {
+        if (!is_null($encryptorClass)) {
+            $this->encryptor = $this->encryptorFactory($encryptorClass, $this->secretKeys);
+            return;
+        }
+
+        $this->encryptor = null;
     }
 
     /**

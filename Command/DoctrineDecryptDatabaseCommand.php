@@ -75,8 +75,11 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
 
         $valueCounter = 0;
 
+        define('_DONOTENCRYPT', TRUE);
+
         //Loop through entity manager meta data
         foreach($this->getEncryptionableEntityMetaData() as $metaData) {
+
             $i = 0;
             $iterator = $this->getEntityIterator($metaData->name);
             $totalCount = $this->getTableCount($metaData->name);
@@ -113,13 +116,15 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                     }
                 }
 
+
                 //Disable the encryptor
                 $this->subscriber->setEncryptor(null);
+
+
                 $this->entityManager->persist($entity);
 
                 if (($i % $batchSize) === 0) {
                     $this->entityManager->flush();
-                    $this->entityManager->clear();
                 }
                 $progressBar->advance(1);
                 $i++;

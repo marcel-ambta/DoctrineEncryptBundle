@@ -78,7 +78,7 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
             $progressBar = new ProgressBar($output, $totalCount);
             foreach ($iterator as $row) {
 
-                $this->subscriber->processFields($row[0]);
+                $this->subscriber->processFields($row[0], $this->getContainer()->get('doctrine.orm.default_entity_manager'), true, 'encrypt');
 
                 if (($i % $batchSize) === 0) {
                     $this->entityManager->flush();

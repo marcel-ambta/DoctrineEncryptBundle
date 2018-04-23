@@ -16,7 +16,6 @@ use PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
  */
 class DoctrineEncryptSubscriber implements EventSubscriber
 {
-
     /**
      * Encryptor interface namespace
      */
@@ -26,24 +25,35 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * Encrypted annotation full name
      */
     const ENCRYPTED_ANN_NAME = 'PhilETaylor\DoctrineEncrypt\Configuration\Encrypted';
+
     /**
      * Count amount of decrypted values in this service
      * @var integer
      */
     public $decryptCounter = 0;
+
     /**
      * Count amount of encrypted values in this service
      * @var integer
      */
     public $encryptCounter = 0;
 
+    /**
+     * @var array
+     */
     public $_originalValues = [];
+
     /**
      * Encryptor
      * @var EncryptorInterface
      */
     private $encryptor;
-    private $decodedRegistry;
+
+    /**
+     * @var array
+     */
+    private $decodedRegistry = [];
+
     /**
      * Annotation reader
      * @var \Doctrine\Common\Annotations\Reader
@@ -89,7 +99,6 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      */
     public function __construct(Reader $annReader, $encryptorClass, array $secretKeys, EncryptorInterface $service = NULL)
     {
-
         $this->annReader = $annReader;
         $this->secretKeys = $secretKeys;
 
@@ -121,6 +130,10 @@ class DoctrineEncryptSubscriber implements EventSubscriber
         }
     }
 
+    /**
+     * @param string $word
+     * @return string
+     */
     public static function capitalize(string $word): string
     {
         if (is_array($word)) {
@@ -130,7 +143,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     }
 
     /**
-     * @return string
+     * @return array
      */
     public function getSecretKeys(): array
     {
@@ -147,19 +160,19 @@ class DoctrineEncryptSubscriber implements EventSubscriber
 
     /**
      * Encrypt the password before it is written to the database.
-     *
-     * Notice that we do not recalculate changes otherwise the password will be written
-     * every time (Because it is going to differ from the un-encrypted value)
      */
     public function onFlush(OnFlushEventArgs $args)
     {
         $em = $args->getEntityManager();
         $unitOfWork = $em->getUnitOfWork();
+
         $this->postFlushDecryptQueue = array();
+
         foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
             $this->entityOnFlush($entity, $em);
             $unitOfWork->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($entity)), $entity);
         }
+
         foreach ($unitOfWork->getScheduledEntityUpdates() as $entity) {
             $this->entityOnFlush($entity, $em);
             $unitOfWork->recomputeSingleEntityChangeSet($em->getClassMetadata(get_class($entity)), $entity);
@@ -174,7 +187,9 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     private function entityOnFlush($entity, EntityManagerInterface $em)
     {
         $objId = spl_object_hash($entity);
+
         $fields = array();
+
         foreach ($this->getEncryptedFields($entity, $em) as $field) {
             $fields[$field->getName()] = array(
                 'field' => $field,
@@ -185,22 +200,28 @@ class DoctrineEncryptSubscriber implements EventSubscriber
             'entity' => $entity,
             'fields' => $fields,
         );
+
         $this->processFields($entity, $em);
     }
 
     /**
      * @param bool $entity
+     *
      * @return \ReflectionProperty[]
      */
     private function getEncryptedFields($entity, EntityManagerInterface $em)
     {
         $className = get_class($entity);
+
         if (isset($this->encryptedFieldCache[$className])) {
             return $this->encryptedFieldCache[$className];
         }
+
         $meta = $em->getClassMetadata($className);
         $encryptedFields = array();
+
         foreach ($meta->getReflectionProperties() as $refProperty) {
+
             /** @var \ReflectionProperty $refProperty */
             if ($this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME)) {
 
@@ -208,7 +229,9 @@ class DoctrineEncryptSubscriber implements EventSubscriber
                 $encryptedFields[] = $refProperty;
             }
         }
+
         $this->encryptedFieldCache[$className] = $encryptedFields;
+
         return $encryptedFields;
     }
 
@@ -216,13 +239,18 @@ class DoctrineEncryptSubscriber implements EventSubscriber
      * Process (encrypt/decrypt) entities fields
      *
      * @param object $entity Some doctrine entity
+     *
+     * @return bool
      */
     public function processFields($entity, EntityManagerInterface $em, $isEncryptOperation = true, $force = null): bool
     {
         $properties = $this->getEncryptedFields($entity, $em);
         $unitOfWork = $em->getUnitOfWork();
+
         $oid = spl_object_hash($entity);
+
         foreach ($properties as $refProperty) {
+
             $AnnotationConfig = $this->annReader->getPropertyAnnotation($refProperty, self::ENCRYPTED_ANN_NAME);
 
             if (null === $this->getEncryptor()) {
@@ -253,7 +281,9 @@ class DoctrineEncryptSubscriber implements EventSubscriber
                     }
 
                     break;
+
                 case false:
+
                     $this->_originalValues[$oid][$refProperty->getName()] = $value;
 
                     if ($force === 'decrypt' && substr($value, strlen($value) - 4) == '<Ha>') {
@@ -312,16 +342,20 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     public function postFlush(PostFlushEventArgs $args)
     {
         $unitOfWork = $args->getEntityManager()->getUnitOfWork();
+
         foreach ($this->postFlushDecryptQueue as $pair) {
+
             $fieldPairs = $pair['fields'];
             $entity = $pair['entity'];
             $oid = spl_object_hash($entity);
+
             foreach ($fieldPairs as $fieldPair) {
                 /** @var \ReflectionProperty $field */
                 $field = $fieldPair['field'];
                 $field->setValue($entity, $fieldPair['value']);
                 $unitOfWork->setOriginalEntityProperty($oid, $field->getName(), $fieldPair['value']);
             }
+
             $this->addToDecodedRegistry($entity);
         }
         $this->postFlushDecryptQueue = array();
@@ -345,6 +379,7 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     {
         $entity = $args->getEntity();
         $em = $args->getEntityManager();
+
         if (!$this->hasInDecodedRegistry($entity)) {
             if ($this->processFields($entity, $em, false)) {
                 $this->addToDecodedRegistry($entity);

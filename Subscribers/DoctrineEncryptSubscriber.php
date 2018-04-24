@@ -268,9 +268,17 @@ class DoctrineEncryptSubscriber implements EventSubscriber
                     if ($force === 'encrypt') {
                         $value = $this->encryptor->encrypt($value);
                     } else {
-                        $oldValue = @$this->_originalValues[$oid][$refProperty->getName()];
-                        if (substr($oldValue, strlen($oldValue) - 4) == '<Ha>') {
-                            $oldValue = $this->encryptor->decrypt(substr($oldValue, 0, strlen($oldValue) - 4));
+
+                        if (array_key_exists($oid, $this->_originalValues) && array_key_exists($refProperty->getName(), $this->_originalValues[$oid])) {
+
+                            $oldValue = @$this->_originalValues[$oid][$refProperty->getName()];
+
+                            if (substr($oldValue, strlen($oldValue) - 4) == '<Ha>') {
+                                $oldValue = $this->encryptor->decrypt(substr($oldValue, 0, strlen($oldValue) - 4));
+                            }
+
+                        } else {
+                            $oldValue = null;
                         }
 
                         if ($oldValue === $value || (null === $oldValue && null === $value)) {

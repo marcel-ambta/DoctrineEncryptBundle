@@ -81,8 +81,8 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
 
         //Loop through entity manager meta data
         foreach ($this->getEncryptionableEntityMetaData() as $metaData) {
-            if ($entityFilter && str_replace('\\','',$metaData->name) != $entityFilter) {
-                $output->writeln('Skipping '.$metaData->name. ' as you only want me to process ' .$entityFilter) ;
+            if ($entityFilter && str_replace('\\', '', $metaData->name) != $entityFilter) {
+                $output->writeln('Skipping ' . $metaData->name . ' as you only want me to process ' . $entityFilter);
                 continue;
             }
 
@@ -115,10 +115,12 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                         //Get decrypted data
                         $unencrypted = $entity->$getter();
 
-                        //Set raw data
-                        $entity->$setter($unencrypted);
+                        if (strpos($unencrypted, '<Ha>')) {
+                            //Set raw data
+                            $entity->$setter($unencrypted);
 
-                        $valueCounter++;
+                            $valueCounter++;
+                        }
                     }
                 }
 
@@ -126,11 +128,15 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                 //Disable the encryptor
                 $this->subscriber->setEncryptor(null);
 
+                if ($valueCounter) {
+                    $this->entityManager->persist($entity);
+                    $output->writeln('Something to decrypt');
 
-                $this->entityManager->persist($entity);
-
-                if (($i % $batchSize) === 0) {
-                    $this->entityManager->flush();
+                    if (($i % $batchSize) === 0) {
+                        $this->entityManager->flush();
+                    }
+                } else {
+                    $output->writeln('Nothing to decrypt');
                 }
                 $progressBar->advance(1);
                 $i++;

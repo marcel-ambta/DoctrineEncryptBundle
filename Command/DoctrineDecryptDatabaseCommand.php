@@ -3,11 +3,10 @@
 namespace PhilETaylor\DoctrineEncrypt\Command;
 
 use PhilETaylor\DoctrineEncrypt\DependencyInjection\DoctrineEncryptExtension;
-use Doctrine\Common\Annotations\AnnotationReader;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -28,6 +27,7 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         $this
             ->setName('doctrine:decrypt:database')
             ->setDescription('Decrypt whole database on tables which are encrypted')
+            ->addOption('entity', null, InputOption::VALUE_OPTIONAL, 'The entity to decrypt', null)
             ->addArgument('batchSize', InputArgument::OPTIONAL, 'The update/flush batch size', 20);
     }
 
@@ -43,13 +43,15 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
 
         //Get list of supported encryptors
         $batchSize = $input->getArgument('batchSize');
+        $entityFilter = $input->getOption('entity', null);
 
         //Get entity manager metadata
         $metaDataArray = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
         //Set counter and loop through entity manager meta data
         $propertyCount = 0;
-        foreach($metaDataArray as $metaData) {
+        foreach ($metaDataArray as $metaData) {
+
             if ($metaData->isMappedSuperclass) {
                 continue;
             }
@@ -78,7 +80,11 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         define('_DONOTENCRYPT', TRUE);
 
         //Loop through entity manager meta data
-        foreach($this->getEncryptionableEntityMetaData() as $metaData) {
+        foreach ($this->getEncryptionableEntityMetaData() as $metaData) {
+            if ($entityFilter && str_replace('\\','',$metaData->name) != $entityFilter) {
+                $output->writeln('Skipping '.$metaData->name. ' as you only want me to process ' .$entityFilter) ;
+                continue;
+            }
 
             $i = 0;
             $iterator = $this->getEntityIterator($metaData->name);
@@ -86,7 +92,7 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
 
             $output->writeln(sprintf('Processing <comment>%s</comment>', $metaData->name));
             $progressBar = new ProgressBar($output, $totalCount);
-            foreach($iterator as $row) {
+            foreach ($iterator as $row) {
                 $entity = $row[0];
 
                 //Create reflectionClass for each entity
@@ -96,7 +102,7 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                 $encryptorUsed = $this->subscriber->getEncryptor();
 
                 //Loop through the property's in the entity
-                foreach($this->getEncryptionableProperties($metaData) as $property) {
+                foreach ($this->getEncryptionableProperties($metaData) as $property) {
                     //Get and check getters and setters
                     $methodeName = ucfirst($property->getName());
 
@@ -104,7 +110,7 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                     $setter = "set" . $methodeName;
 
                     //Check if getter and setter are set
-                    if($entityReflectionClass->hasMethod($getter) && $entityReflectionClass->hasMethod($setter)) {
+                    if ($entityReflectionClass->hasMethod($getter) && $entityReflectionClass->hasMethod($setter)) {
 
                         //Get decrypted data
                         $unencrypted = $entity->$getter();

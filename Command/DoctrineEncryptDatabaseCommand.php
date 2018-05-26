@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-
+use Symfony\Component\Console\Input\InputOption;
 /**
  * Batch encryption for the database
  *
@@ -26,9 +26,8 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         $this
             ->setName('doctrine:encrypt:database')
             ->setDescription('Encrypt whole database on tables which are not encrypted yet')
-            ->addArgument('batchSize', InputArgument::OPTIONAL, 'The update/flush batch size', 20)
-            ->addArgument('entity', InputArgument::OPTIONAL, 'The entity to run');
-
+            ->addOption('entity', null, InputOption::VALUE_OPTIONAL, 'The entity to decrypt', null)
+            ->addArgument('batchSize', InputArgument::OPTIONAL, 'The update/flush batch size', 20);
     }
 
     /**
@@ -41,7 +40,7 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         //Get entity manager, question helper, subscriber service and annotation reader
         $question = $this->getHelper('question');
         $batchSize = $input->getArgument('batchSize');
-        $entity = $input->getArgument('entity');
+        $entityFilter = $input->getOption('entity', null);
 
         //Get entity manager metadata
         $metaDataArray = $this->getEncryptionableEntityMetaData();
@@ -65,10 +64,11 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
             $output->writeln('<info>Found '.$metaData->name.'</info>');
         }
         foreach($metaDataArray as $metaData) {
-
-            if ($entity !==null && $entity!=$metaData->name){
+            if ($entityFilter && str_replace('\\','',$metaData->name) != $entityFilter) {
+                $output->writeln('Skipping '.$metaData->name. ' as you only want me to process ' .$entityFilter) ;
                 continue;
             }
+
 
             $i = 0;
             $iterator = $this->getEntityIterator($metaData->name);

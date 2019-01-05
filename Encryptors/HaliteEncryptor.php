@@ -3,7 +3,7 @@
 namespace PhilETaylor\DoctrineEncrypt\Encryptors;
 
 use MyJoomla\AuditTools\Audit\FilesInformation\RenamedToHide;
-use ParagonIE\Halite\HiddenString;
+use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Halite\KeyFactory;
 use ParagonIE\Halite\Symmetric\Crypto;
 use ParagonIE\Halite\Alerts\CannotPerformOperation;

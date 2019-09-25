@@ -46,6 +46,7 @@ class PhilETaylorDoctrineEncryptExtension extends Extension {
         //Load service file
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load(sprintf('%s.yml', $services['orm']));
+        $loader->load('commands.yml');
     }
 
     /**

@@ -1,0 +1,6 @@
+services:
+    PhilETaylor\DoctrineEncrypt\Command\:
+        resource: '../../Command/*'
+        tags:
+            - { name: 'console.command' }
+

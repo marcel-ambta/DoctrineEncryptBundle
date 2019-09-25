@@ -11,6 +11,9 @@
         "paragonie/halite": ">=4.4",
         "paragonie/hidden-string": "^1"
     },
+     "bundles": {
+        "PhilETaylor\\DoctrineEncrypt\\PhilETaylorDoctrineEncrypt": ["all"]
+    }
     "autoload": {
         "psr-0": {
             "PhilETaylor\\DoctrineEncrypt\\": ""

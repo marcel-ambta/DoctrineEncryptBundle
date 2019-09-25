@@ -13,7 +13,7 @@
     },
      "bundles": {
         "PhilETaylor\\DoctrineEncrypt\\PhilETaylorDoctrineEncrypt": ["all"]
-    }
+    },
     "autoload": {
         "psr-0": {
             "PhilETaylor\\DoctrineEncrypt\\": ""

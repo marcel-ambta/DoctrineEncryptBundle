@@ -1,6 +1,6 @@
 {
     "name": "philetaylor/doctrine-encrypt",
-    "type": "library",
+    "type": "symfony-bundle",
     "keywords": ["doctrine", "symfony", "encrypt", "decrypt"],
     "license": "MIT",
     "description": "Symfony 3.4+/PHP7.2+ bundle which allows to encrypt data in database",

@@ -6,13 +6,13 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt;
+namespace Philetaylor\DoctrineEncryptBundle;
 
-use Philetaylor\DoctrineEncrypt\DependencyInjection\PhilETaylorDoctrineEncryptExtension;
+use Philetaylor\DoctrineEncryptBundle\DependencyInjection\PhiletaylorDoctrineEncryptExtension;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
-use Philetaylor\DoctrineEncrypt\DependencyInjection\Compiler\RegisterServiceCompilerPass;
+use Philetaylor\DoctrineEncryptBundle\DependencyInjection\Compiler\RegisterServiceCompilerPass;
 
 /**
  * Class PhiletaylorDoctrineEncryptBundle.
@@ -29,10 +29,10 @@ class PhiletaylorDoctrineEncryptBundle extends Bundle
     }
 
     /**
-     * @return PhilETaylorDoctrineEncryptExtension
+     * @return PhiletaylorDoctrineEncryptExtension
      */
     public function getContainerExtension()
     {
-        return new PhilETaylorDoctrineEncryptExtension();
+        return new PhiletaylorDoctrineEncryptExtension();
     }
 }

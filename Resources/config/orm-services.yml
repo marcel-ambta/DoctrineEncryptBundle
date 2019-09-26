@@ -1,6 +1,6 @@
 services:
     phil_e_taylor_doctrine_encrypt.orm_subscriber:
-        class: Philetaylor\DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber
+        class: Philetaylor\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber
         arguments: ["@annotation_reader", "%phil_e_taylor_doctrine_encrypt.encryptor_class_name%", "%phil_e_taylor_doctrine_encrypt.keys%"]
         tags:
             -  { name: doctrine.event_subscriber }
@@ -9,7 +9,7 @@ services:
         alias: phil_e_taylor_doctrine_encrypt.orm_subscriber
 
     phil_e_taylor_doctrine_encrypt.encryptor:
-        class: Philetaylor\DoctrineEncrypt\Services\Encryptor
+        class: Philetaylor\DoctrineEncryptBundle\Services\Encryptor
         arguments:
             - "%phil_e_taylor_doctrine_encrypt.encryptor_class_name%"
             - "%phil_e_taylor_doctrine_encrypt.keys%"

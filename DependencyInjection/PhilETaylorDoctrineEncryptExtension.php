@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\DependencyInjection;
+namespace Philetaylor\DoctrineEncryptBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
@@ -45,7 +45,7 @@ class PhilETaylorDoctrineEncryptExtension extends Extension
 
         //Set parameters
         // Now cannot be set by user!
-        $container->setParameter('phil_e_taylor_doctrine_encrypt.encryptor_class_name', '\Philetaylor\DoctrineEncrypt\Encryptors\HaliteEncryptor');
+        $container->setParameter('phil_e_taylor_doctrine_encrypt.encryptor_class_name', '\Philetaylor\DoctrineEncryptBundle\Encryptors\HaliteEncryptor');
 
         $container->setParameter('phil_e_taylor_doctrine_encrypt.keys', $config['keys']);
 

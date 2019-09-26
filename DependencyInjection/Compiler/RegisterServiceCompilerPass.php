@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\DependencyInjection\Compiler;
+namespace Philetaylor\DoctrineEncryptBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

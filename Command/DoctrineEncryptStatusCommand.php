@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Command;
+namespace Philetaylor\DoctrineEncryptBundle\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

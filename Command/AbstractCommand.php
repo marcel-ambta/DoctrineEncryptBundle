@@ -6,9 +6,9 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Command;
+namespace Philetaylor\DoctrineEncryptBundle\Command;
 
-use Philetaylor\DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber;
+use Philetaylor\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionException;
@@ -118,7 +118,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
         $properties      = [];
 
         foreach ($propertyArray as $property) {
-            if ($this->annotationReader->getPropertyAnnotation($property, 'Philetaylor\DoctrineEncrypt\Configuration\Encrypted')) {
+            if ($this->annotationReader->getPropertyAnnotation($property, 'Philetaylor\DoctrineEncryptBundle\Configuration\Encrypted')) {
                 $properties[] = $property;
             }
         }

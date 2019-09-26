@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Subscribers;
+namespace Philetaylor\DoctrineEncryptBundle\Subscribers;
 
 use Doctrine\Common\Annotations\Reader;
 use Doctrine\Common\EventSubscriber;
@@ -15,7 +15,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
-use Philetaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
+use Philetaylor\DoctrineEncryptBundle\Encryptors\EncryptorInterface;
 
 /**
  * Doctrine event subscriber which encrypt/decrypt entities.
@@ -25,12 +25,12 @@ class DoctrineEncryptSubscriber implements EventSubscriber
     /**
      * Encryptor interface namespace.
      */
-    const ENCRYPTOR_INTERFACE_NS = 'Philetaylor\DoctrineEncrypt\Encryptors\EncryptorInterface';
+    const ENCRYPTOR_INTERFACE_NS = 'Philetaylor\DoctrineEncryptBundle\Encryptors\EncryptorInterface';
 
     /**
      * Encrypted annotation full name.
      */
-    const ENCRYPTED_ANN_NAME = 'Philetaylor\DoctrineEncrypt\Configuration\Encrypted';
+    const ENCRYPTED_ANN_NAME = 'Philetaylor\DoctrineEncryptBundle\Configuration\Encrypted';
 
     /**
      * Count amount of decrypted values in this service.

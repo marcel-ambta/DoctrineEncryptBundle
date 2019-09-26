@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Configuration;
+namespace Philetaylor\DoctrineEncryptBundle\Configuration;
 
 /**
  * The Encrypted class handles the @Encrypted annotation.

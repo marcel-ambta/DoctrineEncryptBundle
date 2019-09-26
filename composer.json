@@ -13,10 +13,10 @@
     },
     "autoload": {
         "psr-0": {
-            "Philetaylor\\DoctrineEncrypt\\": ""
+            "Philetaylor\\DoctrineEncryptBundle\\": ""
         },
         "psr-4": {
-            "Philetaylor\\DoctrineEncrypt\\": ""
+            "Philetaylor\\DoctrineEncryptBundle\\": ""
         },
         "exclude-from-classmap": [
             "/Tests/"

@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Encryptors;
+namespace Philetaylor\DoctrineEncryptBundle\Encryptors;
 
 /**
  * Encryptor interface for encryptors.

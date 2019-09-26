@@ -14,8 +14,8 @@ This command will return the amount of entities and the amount of properties wit
 The result will look like this:
 
 ```
-DoctrineEncrypt\Entity\User has 3 properties which are encrypted.
-DoctrineEncrypt\Entity\UserDetail has 13 properties which are encrypted.
+DoctrineEncryptBundle\Entity\User has 3 properties which are encrypted.
+DoctrineEncryptBundle\Entity\UserDetail has 13 properties which are encrypted.
 
 2 entities found which are containing 16 encrypted properties.
 ```
@@ -39,7 +39,7 @@ $ php app/console doctrine:encrypt:database rijndael256
 ```
 
 ```
-$ php app/console doctrine:encrypt:database \Philetaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor
+$ php app/console doctrine:encrypt:database \Philetaylor\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor
 ```
 
 This command will return the amount of values encrypted in the database.
@@ -68,7 +68,7 @@ $ php app/console doctrine:encrypt:database rijndael256
 ```
 
 ```
-$ php app/console doctrine:encrypt:database \Philetaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor
+$ php app/console doctrine:encrypt:database \Philetaylor\DoctrineEncryptBundle\Encryptors\Rijndael256Encryptor
 ```
 
 This command will return the amount of entities and the amount of values decrypted in the database.

@@ -6,7 +6,7 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Encryptors;
+namespace Philetaylor\DoctrineEncryptBundle\Encryptors;
 
 use ParagonIE\HiddenString\HiddenString;
 use ParagonIE\Halite\KeyFactory;

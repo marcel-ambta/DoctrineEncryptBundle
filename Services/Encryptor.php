@@ -6,11 +6,11 @@
  * @license    MIT
  */
 
-namespace Philetaylor\DoctrineEncrypt\Services;
+namespace Philetaylor\DoctrineEncryptBundle\Services;
 
 class Encryptor
 {
-    /** @var \Philetaylor\DoctrineEncrypt\Encryptors\EncryptorInterface */
+    /** @var \Philetaylor\DoctrineEncryptBundle\Encryptors\EncryptorInterface */
     protected $encryptor;
 
     public function __construct($encryptName, $key)

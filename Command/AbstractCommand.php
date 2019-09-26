@@ -1,9 +1,17 @@
 <?php
-namespace PhilETaylor\DoctrineEncrypt\Command;
+/*
+ * @copyright  Copyright (C) 2017, 2018, 2019 Blue Flame Digital Solutions Limited / Phil Taylor. All rights reserved.
+ * @author     Phil Taylor <phil@phil-taylor.com>
+ * @see        https://github.com/PhilETaylor/mysites.guru
+ * @license    MIT
+ */
 
-use PhilETaylor\DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber;
+namespace Philetaylor\DoctrineEncrypt\Command;
+
+use Philetaylor\DoctrineEncrypt\Subscribers\DoctrineEncryptSubscriber;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
+use ReflectionException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,7 +23,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  **/
 abstract class AbstractCommand extends ContainerAwareCommand
 {
-
     /**
      * @var EntityManagerInterface
      */
@@ -36,10 +43,10 @@ abstract class AbstractCommand extends ContainerAwareCommand
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $container = $this->getContainer();
-        $this->entityManager = $container->get('doctrine.orm.entity_manager');
+        $container              = $this->getContainer();
+        $this->entityManager    = $container->get('doctrine.orm.entity_manager');
         $this->annotationReader = $container->get('annotation_reader');
-        $this->subscriber = $container->get('phil_e_taylor_doctrine_encrypt.subscriber');
+        $this->subscriber       = $container->get('phil_e_taylor_doctrine_encrypt.subscriber');
     }
 
     /**
@@ -52,11 +59,12 @@ abstract class AbstractCommand extends ContainerAwareCommand
     protected function getEntityIterator($entityName)
     {
         $query = $this->entityManager->createQuery(sprintf('SELECT o FROM %s o', $entityName));
+
         return $query->iterate();
     }
 
     /**
-     * Get the number of rows in an entity-table
+     * Get the number of rows in an entity-table.
      *
      * @param string $entityName
      *
@@ -65,6 +73,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
     protected function getTableCount($entityName)
     {
         $query = $this->entityManager->createQuery(sprintf('SELECT COUNT(o) FROM %s o', $entityName));
+
         return (int) $query->getSingleScalarResult();
     }
 
@@ -79,14 +88,13 @@ abstract class AbstractCommand extends ContainerAwareCommand
         $validMetaData = [];
         $metaDataArray = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
-        foreach ($metaDataArray as $entityMetaData)
-        {
+        foreach ($metaDataArray as $entityMetaData) {
             if ($entityMetaData->isMappedSuperclass) {
                 continue;
             }
 
             $properties = $this->getEncryptionableProperties($entityMetaData);
-            if (count($properties) == 0) {
+            if (0 == \count($properties)) {
                 continue;
             }
 
@@ -100,16 +108,17 @@ abstract class AbstractCommand extends ContainerAwareCommand
      * @param $entityMetaData
      *
      * @return array
+     * @throws ReflectionException
      */
     protected function getEncryptionableProperties($entityMetaData)
     {
         //Create reflectionClass for each meta data object
-        $reflectionClass = New \ReflectionClass($entityMetaData->name);
-        $propertyArray = $reflectionClass->getProperties();
-        $properties    = [];
+        $reflectionClass = new \ReflectionClass($entityMetaData->name);
+        $propertyArray   = $reflectionClass->getProperties();
+        $properties      = [];
 
         foreach ($propertyArray as $property) {
-            if ($this->annotationReader->getPropertyAnnotation($property, 'PhilETaylor\DoctrineEncrypt\Configuration\Encrypted')) {
+            if ($this->annotationReader->getPropertyAnnotation($property, 'Philetaylor\DoctrineEncrypt\Configuration\Encrypted')) {
                 $properties[] = $property;
             }
         }

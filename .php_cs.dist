@@ -1,0 +1,32 @@
+<?php
+
+$finder = PhpCsFixer\Finder::create()
+    ->in([
+        __DIR__,
+        ]
+        )
+;
+
+return PhpCsFixer\Config::create()
+    ->setRules(array(
+        'simplified_null_return' => true,
+        '@Symfony' => true,
+        '@DoctrineAnnotation' => true,
+        '@Symfony:risky' => true,
+        'array_syntax' => ['syntax' => 'short'],
+        'binary_operator_spaces' => ['align_double_arrow' => true, 'align_equals' => true],
+        'protected_to_private' => false,
+        'semicolon_after_instruction' => false,
+        'header_comment' => [
+            'separate'=>'bottom',
+            'header' => <<<EOF
+@copyright  Copyright (C) 2017, 2018, 2019 Blue Flame Digital Solutions Limited / Phil Taylor. All rights reserved.
+@author     Phil Taylor <phil@phil-taylor.com>
+@see        https://github.com/PhilETaylor/mysites.guru
+@license    MIT
+EOF
+        ]
+    ))
+    ->setRiskyAllowed(true)
+    ->setFinder($finder)
+;

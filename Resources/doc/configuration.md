@@ -20,7 +20,7 @@ There are 3 paramaters in the configuration of the Doctrine encryption bundle wh
 ambta_doctrine_encrypt:
     secret_key:           AB1CD2EF3GH4IJ5KL6MN7OP8QR9ST0UW # Your own random 256 bit key (32 characters)
     encryptor:            rijndael256 # rijndael256 or rijndael128
-    encryptor_class:      \PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor # your own encryption class
+    encryptor_class:      \Philetaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor # your own encryption class
 ```
 
 ### xml
@@ -32,7 +32,7 @@ ambta_doctrine_encrypt:
         <!-- rijndael256 or rijndael128 -->
         <ambta_doctrine_encrypt:encryptor>rijndael256</ambta_doctrine_encrypt:encryptor>
         <!-- your own encryption class -->
-        <ambta_doctrine_encrypt:encryptor_class>\PhilETaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor</ambta_doctrine_encrypt:encryptor_class>
+        <ambta_doctrine_encrypt:encryptor_class>\Philetaylor\DoctrineEncrypt\Encryptors\Rijndael256Encryptor</ambta_doctrine_encrypt:encryptor_class>
 </ambta_doctrine_encrypt:config>
 ```
 

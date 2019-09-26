@@ -1,6 +1,12 @@
 <?php
+/*
+ * @copyright  Copyright (C) 2017, 2018, 2019 Blue Flame Digital Solutions Limited / Phil Taylor. All rights reserved.
+ * @author     Phil Taylor <phil@phil-taylor.com>
+ * @see        https://github.com/PhilETaylor/mysites.guru
+ * @license    MIT
+ */
 
-namespace PhilETaylor\DoctrineEncrypt\Command;
+namespace Philetaylor\DoctrineEncrypt\Command;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,7 +19,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class DoctrineEncryptStatusCommand extends AbstractCommand
 {
-
     /**
      * {@inheritdoc}
      */
@@ -32,13 +37,13 @@ class DoctrineEncryptStatusCommand extends AbstractCommand
         $metaDataArray = $this->entityManager->getMetadataFactory()->getAllMetadata();
 
         $totalCount = 0;
-        foreach($metaDataArray as $metaData) {
+        foreach ($metaDataArray as $metaData) {
             if ($metaData->isMappedSuperclass) {
                 continue;
             }
 
-            $count = 0;
-            $encryptedPropertiesCount = count($this->getEncryptionableProperties($metaData));
+            $count                    = 0;
+            $encryptedPropertiesCount = \count($this->getEncryptionableProperties($metaData));
             if ($encryptedPropertiesCount > 0) {
                 $totalCount += $encryptedPropertiesCount;
                 $count += $encryptedPropertiesCount;
@@ -52,12 +57,12 @@ class DoctrineEncryptStatusCommand extends AbstractCommand
         }
 
         $output->writeln('');
-        $output->writeln(sprintf('<info>%d</info> entities found which are containing <info>%d</info> encrypted properties.', count($metaDataArray), $totalCount));
+        $output->writeln(sprintf('<info>%d</info> entities found which are containing <info>%d</info> encrypted properties.', \count($metaDataArray), $totalCount));
 
         $output->writeln('');
         $output->writeln('Here are the configured encryption keys:');
         $keys = $this->subscriber->getSecretKeys();
-        foreach ($keys as $k=>$v){
+        foreach ($keys as $k=>$v) {
             $output->writeln("<info>$k</info>\t\t=>\t\t<info>$v</info>");
         }
     }

@@ -1,8 +1,13 @@
 <?php
+/*
+ * @copyright  Copyright (C) 2017, 2018, 2019 Blue Flame Digital Solutions Limited / Phil Taylor. All rights reserved.
+ * @author     Phil Taylor <phil@phil-taylor.com>
+ * @see        https://github.com/PhilETaylor/mysites.guru
+ * @license    MIT
+ */
 
-namespace PhilETaylor\DoctrineEncrypt\Command;
+namespace Philetaylor\DoctrineEncrypt\Command;
 
-use PhilETaylor\DoctrineEncrypt\DependencyInjection\DoctrineEncryptExtension;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,14 +16,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
- * Decrypt whole database on tables which are encrypted
+ * Decrypt whole database on tables which are encrypted.
  *
  * @author Marcel van Nuil <marcel@ambta.com>
  * @author Michael Feinbier <michael@feinbier.net>
  */
 class DoctrineDecryptDatabaseCommand extends AbstractCommand
 {
-
     /**
      * {@inheritdoc}
      */
@@ -42,7 +46,7 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         $question = $this->getHelper('question');
 
         //Get list of supported encryptors
-        $batchSize = $input->getArgument('batchSize');
+        $batchSize    = $input->getArgument('batchSize');
         $entityFilter = $input->getOption('entity', null);
 
         //Get entity manager metadata
@@ -51,21 +55,20 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         //Set counter and loop through entity manager meta data
         $propertyCount = 0;
         foreach ($metaDataArray as $metaData) {
-
             if ($metaData->isMappedSuperclass) {
                 continue;
             }
 
-            $countProperties = count($this->getEncryptionableProperties($metaData));
+            $countProperties = \count($this->getEncryptionableProperties($metaData));
             $propertyCount += $countProperties;
         }
 
         $confirmationQuestion = new ConfirmationQuestion(
-            "<question>\n" . count($metaDataArray) . " entities found which are containing " . $propertyCount . " properties with the encryption tag. \n\n" .
-            "Which are going to be decrypted with [" . $this->subscriber->getEncryptor() . "]. \n\n" .
-            "Wrong settings can mess up your data and it will be unrecoverable. \n" .
-            "I advise you to make <bg=yellow;options=bold>a backup</bg=yellow;options=bold>. \n\n" .
-            "Continue with this action? (y/yes)</question>", false
+            "<question>\n".\count($metaDataArray).' entities found which are containing '.$propertyCount." properties with the encryption tag. \n\n".
+            'Which are going to be decrypted with ['.$this->subscriber->getEncryptor()."]. \n\n".
+            "Wrong settings can mess up your data and it will be unrecoverable. \n".
+            "I advise you to make <bg=yellow;options=bold>a backup</bg=yellow;options=bold>. \n\n".
+            'Continue with this action? (y/yes)</question>', false
         );
 
         if (!$question->ask($input, $output, $confirmationQuestion)) {
@@ -77,17 +80,17 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
 
         $valueCounter = 0;
 
-        define('_DONOTENCRYPT', TRUE);
+        \define('_DONOTENCRYPT', true);
 
         //Loop through entity manager meta data
         foreach ($this->getEncryptionableEntityMetaData() as $metaData) {
             if ($entityFilter && str_replace('\\', '', $metaData->name) != $entityFilter) {
-                $output->writeln('Skipping ' . $metaData->name . ' as you only want me to process ' . $entityFilter);
+                $output->writeln('Skipping '.$metaData->name.' as you only want me to process '.$entityFilter);
                 continue;
             }
 
-            $i = 0;
-            $iterator = $this->getEntityIterator($metaData->name);
+            $i          = 0;
+            $iterator   = $this->getEntityIterator($metaData->name);
             $totalCount = $this->getTableCount($metaData->name);
 
             $output->writeln(sprintf('Processing <comment>%s</comment>', $metaData->name));
@@ -96,7 +99,7 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                 $entity = $row[0];
 
                 //Create reflectionClass for each entity
-                $entityReflectionClass = New \ReflectionClass($entity);
+                $entityReflectionClass = new \ReflectionClass($entity);
 
                 //Get the current encryptor used
                 $encryptorUsed = $this->subscriber->getEncryptor();
@@ -106,12 +109,11 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                     //Get and check getters and setters
                     $methodeName = ucfirst($property->getName());
 
-                    $getter = "get" . $methodeName;
-                    $setter = "set" . $methodeName;
+                    $getter = 'get'.$methodeName;
+                    $setter = 'set'.$methodeName;
 
                     //Check if getter and setter are set
                     if ($entityReflectionClass->hasMethod($getter) && $entityReflectionClass->hasMethod($setter)) {
-
                         //Get decrypted data
                         $unencrypted = $entity->$getter();
 
@@ -119,11 +121,10 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                             //Set raw data
                             $entity->$setter($unencrypted);
 
-                            $valueCounter++;
+                            ++$valueCounter;
                         }
                     }
                 }
-
 
                 //Disable the encryptor
                 $this->subscriber->setEncryptor(null);
@@ -132,19 +133,18 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
                     $this->entityManager->persist($entity);
                     $output->writeln('Something to decrypt');
 
-                    if (($i % $batchSize) === 0) {
+                    if (0 === ($i % $batchSize)) {
                         $this->entityManager->flush();
                     }
                 } else {
                     $output->writeln('Nothing to decrypt');
                 }
                 $progressBar->advance(1);
-                $i++;
+                ++$i;
 
                 //Set the encryptor again
                 $this->subscriber->setEncryptor($encryptorUsed);
             }
-
 
             $progressBar->finish();
             $output->writeln('');
@@ -158,6 +158,6 @@ class DoctrineDecryptDatabaseCommand extends AbstractCommand
         }
 
         //Say it is finished
-        $output->writeln("\nDecryption finished values found: <info>" . $valueCounter . "</info>, decrypted: <info>" . $this->subscriber->decryptCounter . "</info>.\nAll values are now decrypted.");
+        $output->writeln("\nDecryption finished values found: <info>".$valueCounter.'</info>, decrypted: <info>'.$this->subscriber->decryptCounter."</info>.\nAll values are now decrypted.");
     }
 }

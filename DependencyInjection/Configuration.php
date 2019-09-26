@@ -1,12 +1,18 @@
 <?php
+/*
+ * @copyright  Copyright (C) 2017, 2018, 2019 Blue Flame Digital Solutions Limited / Phil Taylor. All rights reserved.
+ * @author     Phil Taylor <phil@phil-taylor.com>
+ * @see        https://github.com/PhilETaylor/mysites.guru
+ * @license    MIT
+ */
 
-namespace PhilETaylor\DoctrineEncrypt\DependencyInjection;
+namespace Philetaylor\DoctrineEncrypt\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
 /**
- * Configuration tree for security bundle. Full tree you can see in Resources/docs
+ * Configuration tree for security bundle. Full tree you can see in Resources/docs.
  *
  * This is the class that validates and merges configuration from your app/config files
  *
@@ -14,16 +20,14 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
  */
 class Configuration implements ConfigurationInterface
 {
-
     /**
-     * {@inheritDoc}
+     * {@inheritdoc}
      */
     public function getConfigTreeBuilder()
     {
-
         //Create tree builder
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('phil_e_taylor_doctrine_encrypt');
+        $rootNode    = $treeBuilder->root('phil_e_taylor_doctrine_encrypt');
 
         // Grammar of config tree
         $rootNode
@@ -41,5 +45,4 @@ class Configuration implements ConfigurationInterface
 
         return $treeBuilder;
     }
-
 }

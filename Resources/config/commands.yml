@@ -1,5 +1,5 @@
 services:
-    PhilETaylor\DoctrineEncrypt\Command\:
+    Philetaylor\DoctrineEncrypt\Command\:
         resource: '../../Command/*'
         tags:
             - { name: 'console.command' }

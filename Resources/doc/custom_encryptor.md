@@ -4,7 +4,7 @@ We can imagine that you want to use your own encryption class, it is simpel.
 
 ### Warning: make sure you add the `<ENC>` after your encrypted string.
 
-1. Create an new class and implement PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface.
+1. Create an new class and implement Philetaylor\DoctrineEncrypt\Encryptors\EncryptorInterface.
 2. Create a constructor with the parameter secret key `__construct($secretKey)`
 3. Create a function called encrypt with parameter data `encrypt($data)`
 4. Create a function called decrypt with parameter data `decrypt($data)`
@@ -20,7 +20,7 @@ We can imagine that you want to use your own encryption class, it is simpel.
 
 namespace YourBundle\Library\Encryptor;
 
-use PhilETaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
+use Philetaylor\DoctrineEncrypt\Encryptors\EncryptorInterface;
 
 /**
  * Class for variable encryption

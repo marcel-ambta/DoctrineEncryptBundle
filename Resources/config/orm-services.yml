@@ -5,6 +5,9 @@ services:
         tags:
             -  { name: doctrine.event_subscriber }
 
+    Philetaylor\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber:
+        alias: phil_e_taylor_doctrine_encrypt.orm_subscriber
+
     phil_e_taylor_doctrine_encrypt.subscriber:
         alias: phil_e_taylor_doctrine_encrypt.orm_subscriber
 

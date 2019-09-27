@@ -21,7 +21,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  * @author Marcel van Nuil <marcel@ambta.com>
  * @author Michael Feinbier <michael@feinbier.net>
  */
-class DoctrineDecryptDatabaseCommand extends AbstractCommand
+class DoctrineDecryptDatabaseCommand extends PhiletaylorAbstract
 {
     /**
      * {@inheritdoc}

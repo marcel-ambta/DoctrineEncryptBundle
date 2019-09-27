@@ -270,6 +270,10 @@ class DoctrineEncryptSubscriber implements EventSubscriber
                 continue;
             }
 
+            // if using @Encrypted without key_name then use key called "main" as a sensible default.
+            if (null === $AnnotationConfig->key_name) {
+                $AnnotationConfig->key_name = 'main';
+            }
             $this->encryptor->setKeyName($AnnotationConfig->key_name);
 
             $value = $refProperty->getValue($entity);

@@ -14,19 +14,20 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Get status of doctrine encrypt bundle and the database.
  *
+ * @author Phil E. Taylor <phil@phil-taylor.com>
  * @author Marcel van Nuil <marcel@ambta.com>
  * @author Michael Feinbier <michael@feinbier.net>
  */
-class DoctrineEncryptStatusCommand extends AbstractCommand
+class DoctrineEncryptStatusCommand extends PhiletaylorAbstract
 {
+    protected static $defaultName = 'doctrine:encrypt:status';
+
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
-        $this
-            ->setName('doctrine:encrypt:status')
-            ->setDescription('Get status of doctrine encrypt bundle and the database');
+        $this->setDescription('Get status of doctrine encrypt bundle and the database');
     }
 
     /**
@@ -60,8 +61,13 @@ class DoctrineEncryptStatusCommand extends AbstractCommand
         $output->writeln(sprintf('<info>%d</info> entities found which are containing <info>%d</info> encrypted properties.', \count($metaDataArray), $totalCount));
 
         $output->writeln('');
-        $output->writeln('Here are the configured encryption keys:');
         $keys = $this->subscriber->getSecretKeys();
+        if (!$keys) {
+            $output->writeln('<error>There are NO configured encryption keys!!</error>');
+
+            return;
+        }
+        $output->writeln('Here are the configured encryption keys:');
         foreach ($keys as $k=>$v) {
             $output->writeln("<info>$k</info>\t\t=>\t\t<info>$v</info>");
         }

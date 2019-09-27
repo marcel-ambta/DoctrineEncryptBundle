@@ -8,22 +8,30 @@
 
 namespace Philetaylor\DoctrineEncryptBundle\Command;
 
+use ParagonIE\Halite\KeyFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TestCommand extends Command
+/**
+ * Get status of doctrine encrypt bundle and the database.
+ */
+class DoctrineEncryptCreateKeyCommand extends Command
 {
-    protected static $defaultName = 'zzz:zzz:zzz';
+    protected static $defaultName = 'doctrine:encrypt:createkey';
+
+    public function __construct(string $projectDir)
+    {
+        $this->projectDir = $projectDir;
+        parent::__construct();
+    }
 
     /**
      * {@inheritdoc}
      */
     protected function configure()
     {
-        $this
-            ->setDescription('zzz:zzz:zzz')
-            ->setHelp('zzz:zzz:zzz');
+        $this->setDescription('Crete a new encryption key in /.encryptionkeys');
     }
 
     /**
@@ -31,5 +39,10 @@ class TestCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $path = $this->projectDir.'/.encryptionkeys/'.time().'.key';
+
+        KeyFactory::save(KeyFactory::generateEncryptionKey(), $path);
+
+        $output->writeln(sprintf('<info>Key saved to %s</info>', $path));
     }
 }

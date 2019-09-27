@@ -21,7 +21,7 @@ use Symfony\Component\Console\Input\InputOption;
  * @author Marcel van Nuil <marcel@ambta.com>
  * @author Michael Feinbier <michael@feinbier.net>
  */
-class DoctrineEncryptDatabaseCommand extends AbstractCommand
+class DoctrineEncryptDatabaseCommand extends PhiletaylorAbstract
 {
     /**
      * {@inheritdoc}
@@ -46,6 +46,21 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
         $question     = $this->getHelper('question');
         $batchSize    = $input->getArgument('batchSize');
         $entityFilter = $input->getOption('entity', null);
+
+        // check keys exist and are useable
+        $keys = $this->subscriber->getSecretKeys();
+
+        if (!\count($keys)) {
+            $output->writeln('<error>There are no encryption keys set as phil_e_taylor_doctrine_encrypt.keys!</error>');
+
+            return;
+        }
+
+        foreach ($keys as $v=>$key) {
+            if (!file_exists($key)) {
+                $output->writeln(sprintf('<error>Key doesnt exist! %s => %s</error>', $v, $key));
+            }
+        }
 
         //Get entity manager metadata
         $metaDataArray        = $this->getEncryptionableEntityMetaData();
@@ -81,7 +96,7 @@ class DoctrineEncryptDatabaseCommand extends AbstractCommand
             $output->writeln(sprintf('Processing <comment>%s</comment>', $metaData->name));
             $progressBar = new ProgressBar($output, $totalCount);
             foreach ($iterator as $row) {
-                $this->subscriber->processFields($row[0], $this->getContainer()->get('doctrine.orm.default_entity_manager'), true, 'encrypt');
+                $this->subscriber->processFields($row[0], $this->entityManager, true, 'encrypt');
 
                 if (0 === ($i % $batchSize)) {
                     $this->entityManager->flush();

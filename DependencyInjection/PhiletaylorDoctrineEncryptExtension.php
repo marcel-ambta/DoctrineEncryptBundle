@@ -5,11 +5,14 @@
  * @see        https://github.com/PhilETaylor/mysites.guru
  * @license    MIT
  */
+
 namespace Philetaylor\DoctrineEncryptBundle\DependencyInjection;
+
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\DependencyInjection\Loader;
+
 /**
  * Initialization of bundle.
  *
@@ -29,16 +32,7 @@ class PhiletaylorDoctrineEncryptExtension extends Extension
         $config        = $this->processConfiguration($configuration, $configs);
         //Set orm-service in array of services
         $services = ['orm' => 'orm-services'];
-        //If no secret key is set, check for framework secret, otherwise throw exception
-//        if (empty($config['secret_key'])) {
-//            if ($container->hasParameter('secret')) {
-//                $config['secret_key'] = $container->getParameter('secret');
-//            } else {
-//                throw new \RuntimeException('You must provide "secret_key" for doctrine_encrypt or "secret" for framework');
-//            }
-//        }
-        //Set parameters
-        // Now cannot be set by user!
+
         $container->setParameter('phil_e_taylor_doctrine_encrypt.encryptor_class_name', '\Philetaylor\DoctrineEncryptBundle\Encryptors\HaliteEncryptor');
         $container->setParameter('phil_e_taylor_doctrine_encrypt.keys', $config['keys']);
         //Load service file
@@ -46,6 +40,7 @@ class PhiletaylorDoctrineEncryptExtension extends Extension
         $loader->load(sprintf('%s.yml', $services['orm']));
         $loader->load('commands.yml');
     }
+
     /**
      * Get alias for configuration.
      *

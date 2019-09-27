@@ -1,6 +1,10 @@
 services:
+    _defaults:
+        bind:
+            $projectDir: '%kernel.project_dir%'
     Philetaylor\DoctrineEncryptBundle\Command\:
         resource: '../../Command/*'
+        autowire: true
         tags:
             - { name: 'console.command' }
 

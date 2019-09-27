@@ -8,11 +8,13 @@
 
 namespace Philetaylor\DoctrineEncryptBundle\Command;
 
+use Doctrine\Common\Annotations\Reader;
 use Philetaylor\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionException;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Bridge\Doctrine\RegistryInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -21,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author Michael Feinbier <michael@feinbier.net>
  **/
-abstract class AbstractCommand extends ContainerAwareCommand
+abstract class PhiletaylorAbstract extends Command
 {
     /**
      * @var EntityManagerInterface
@@ -39,14 +41,28 @@ abstract class AbstractCommand extends ContainerAwareCommand
     protected $annotationReader;
 
     /**
+     * @param RegistryInterface         $entityManager
+     * @param CachedReader              $cachedReader
+     * @param DoctrineEncryptSubscriber $doctrineEncryptSubscriber
+     */
+    public function __construct(
+        RegistryInterface $entityManager,
+        Reader $cachedReader,
+        DoctrineEncryptSubscriber $doctrineEncryptSubscriber)
+    {
+        $this->entityManager    = $entityManager->getEntityManager();
+        $this->annotationReader = $cachedReader;
+        $this->subscriber       = $doctrineEncryptSubscriber;
+
+        // you *must* call the parent constructor
+        parent::__construct();
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
-        $container              = $this->getContainer();
-        $this->entityManager    = $container->get('doctrine.orm.entity_manager');
-        $this->annotationReader = $container->get('annotation_reader');
-        $this->subscriber       = $container->get('phil_e_taylor_doctrine_encrypt.subscriber');
     }
 
     /**
@@ -108,6 +124,7 @@ abstract class AbstractCommand extends ContainerAwareCommand
      * @param $entityMetaData
      *
      * @return array
+     *
      * @throws ReflectionException
      */
     protected function getEncryptionableProperties($entityMetaData)

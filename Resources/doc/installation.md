@@ -18,7 +18,7 @@ AmbtaDoctrineEncryptBundle should be installed usin [Composer](http://getcompose
 ``` js
 {
     "require": {
-        "ambta/doctrine-encrypt-bundle": "2.4.*"
+        "ambta/doctrine-encrypt-bundle": "2.5.*"
     }
 }
 ```

@@ -27,7 +27,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 abstract class PhiletaylorAbstract extends Command
 {
     /**
-     * @var EntityManagerInterface
+     * @var ManagerRegistry
      */
     protected $entityManager;
 
@@ -51,7 +51,7 @@ abstract class PhiletaylorAbstract extends Command
         Reader $cachedReader,
         DoctrineEncryptSubscriber $doctrineEncryptSubscriber)
     {
-        $this->entityManager    = $entityManager->getEntityManager();
+        $this->entityManager    = $entityManager->getManager();
         $this->annotationReader = $cachedReader;
         $this->subscriber       = $doctrineEncryptSubscriber;
 

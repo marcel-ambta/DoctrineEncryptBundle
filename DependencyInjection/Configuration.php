@@ -26,11 +26,10 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         //Create tree builder
-        $treeBuilder = new TreeBuilder();
-        $rootNode    = $treeBuilder->root('phil_e_taylor_doctrine_encrypt');
+        $treeBuilder = new TreeBuilder('phil_e_taylor_doctrine_encrypt');
 
         // Grammar of config tree
-        $rootNode
+        $treeBuilder->getRootNode()
             ->children()
             ->arrayNode('keys')
             ->useAttributeAsKey('name')

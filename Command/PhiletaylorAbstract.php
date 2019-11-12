@@ -17,6 +17,7 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * Base command containing usefull base methods.
@@ -46,7 +47,7 @@ abstract class PhiletaylorAbstract extends Command
      * @param DoctrineEncryptSubscriber $doctrineEncryptSubscriber
      */
     public function __construct(
-        RegistryInterface $entityManager,
+        ManagerRegistry $entityManager,
         Reader $cachedReader,
         DoctrineEncryptSubscriber $doctrineEncryptSubscriber)
     {

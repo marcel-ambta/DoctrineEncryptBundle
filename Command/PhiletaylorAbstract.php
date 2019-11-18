@@ -8,16 +8,15 @@
 
 namespace Philetaylor\DoctrineEncryptBundle\Command;
 
+use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\Common\Annotations\Reader;
 use Philetaylor\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionException;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Doctrine\Common\Persistence\ManagerRegistry;
 
 /**
  * Base command containing usefull base methods.
@@ -27,7 +26,7 @@ use Doctrine\Common\Persistence\ManagerRegistry;
 abstract class PhiletaylorAbstract extends Command
 {
     /**
-     * @var ManagerRegistry
+     * @var EntityManagerInterface
      */
     protected $entityManager;
 
@@ -42,7 +41,7 @@ abstract class PhiletaylorAbstract extends Command
     protected $annotationReader;
 
     /**
-     * @param RegistryInterface         $entityManager
+     * @param ManagerRegistry         $entityManager
      * @param CachedReader              $cachedReader
      * @param DoctrineEncryptSubscriber $doctrineEncryptSubscriber
      */

@@ -37,7 +37,7 @@ interface EncryptorInterface
     public function decrypt($data);
 
     /**
-     * @param $data
+     * @param $key
      *
      * @return mixed
      */

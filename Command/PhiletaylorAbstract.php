@@ -41,8 +41,8 @@ abstract class PhiletaylorAbstract extends Command
     protected $annotationReader;
 
     /**
-     * @param ManagerRegistry         $entityManager
-     * @param CachedReader              $cachedReader
+     * @param ManagerRegistry           $entityManager
+     * @param Reader                    $cachedReader
      * @param DoctrineEncryptSubscriber $doctrineEncryptSubscriber
      */
     public function __construct(

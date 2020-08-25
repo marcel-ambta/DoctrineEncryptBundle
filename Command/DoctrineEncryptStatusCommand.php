@@ -65,11 +65,13 @@ class DoctrineEncryptStatusCommand extends PhiletaylorAbstract
         if (!$keys) {
             $output->writeln('<error>There are NO configured encryption keys!!</error>');
 
-            return;
+            return self::FAILURE;
         }
         $output->writeln('Here are the configured encryption keys:');
         foreach ($keys as $k=>$v) {
             $output->writeln("<info>$k</info>\t\t=>\t\t<info>$v</info>");
         }
+        
+         return self::SUCCESS;
     }
 }

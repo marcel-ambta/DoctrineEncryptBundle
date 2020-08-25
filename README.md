@@ -2,7 +2,7 @@
 
 Forked from ambta/DoctrineEncryptBundle for major rewrite with aims
 
- - Symfony 3.4+ Compatibility 
+ - Symfony 5.1+ Compatibility 
  - PHP 7.2+
  - Using Sodium* methods for encryption
  - Implement Blind indexs for encrypted data with authenticated hashes (see: 

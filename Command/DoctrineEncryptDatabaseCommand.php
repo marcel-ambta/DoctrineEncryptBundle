@@ -53,7 +53,7 @@ class DoctrineEncryptDatabaseCommand extends PhiletaylorAbstract
         if (!\count($keys)) {
             $output->writeln('<error>There are no encryption keys set as phil_e_taylor_doctrine_encrypt.keys!</error>');
 
-            return;
+            return self::FAILURE;
         }
 
         foreach ($keys as $v=>$key) {
@@ -73,7 +73,7 @@ class DoctrineEncryptDatabaseCommand extends PhiletaylorAbstract
         );
 
         if (!$question->ask($input, $output, $confirmationQuestion)) {
-            return;
+            return self::SUCCESS;
         }
 
         //Start decrypting database
@@ -113,5 +113,7 @@ class DoctrineEncryptDatabaseCommand extends PhiletaylorAbstract
 
         //Say it is finished
         $output->writeln("\nEncryption finished. Values encrypted: <info>".$this->subscriber->encryptCounter." values</info>.\nAll values are now encrypted.");
+
+        return self::SUCCESS;
     }
 }

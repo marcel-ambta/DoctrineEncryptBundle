@@ -44,5 +44,7 @@ class DoctrineEncryptCreateKeyCommand extends Command
         KeyFactory::save(KeyFactory::generateEncryptionKey(), $path);
 
         $output->writeln(sprintf('<info>Key saved to %s</info>', $path));
+        
+        return self::SUCCESS;
     }
 }

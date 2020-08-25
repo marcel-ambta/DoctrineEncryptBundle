@@ -8,7 +8,7 @@
 
 namespace Philetaylor\DoctrineEncryptBundle\Command;
 
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Common\Annotations\Reader;
 use Philetaylor\DoctrineEncryptBundle\Subscribers\DoctrineEncryptSubscriber;
 use Doctrine\Common\Annotations\AnnotationReader;

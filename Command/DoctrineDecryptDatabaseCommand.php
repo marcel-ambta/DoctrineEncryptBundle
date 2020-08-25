@@ -72,7 +72,7 @@ class DoctrineDecryptDatabaseCommand extends PhiletaylorAbstract
         );
 
         if (!$question->ask($input, $output, $confirmationQuestion)) {
-            return;
+            return self::FAILURE;
         }
 
         //Start decrypting database
@@ -131,13 +131,10 @@ class DoctrineDecryptDatabaseCommand extends PhiletaylorAbstract
 
                 if ($valueCounter) {
                     $this->entityManager->persist($entity);
-                    $output->writeln('Something to decrypt');
 
                     if (0 === ($i % $batchSize)) {
                         $this->entityManager->flush();
                     }
-                } else {
-                    $output->writeln('Nothing to decrypt');
                 }
                 $progressBar->advance(1);
                 ++$i;
@@ -159,5 +156,7 @@ class DoctrineDecryptDatabaseCommand extends PhiletaylorAbstract
 
         //Say it is finished
         $output->writeln("\nDecryption finished values found: <info>".$valueCounter.'</info>, decrypted: <info>'.$this->subscriber->decryptCounter."</info>.\nAll values are now decrypted.");
+
+        return self::SUCCESS;
     }
 }
